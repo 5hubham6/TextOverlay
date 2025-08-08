@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Dynamic Meme Creator{% endblock %}
+{% block body %}
+<div class="meme-container">
+    <img src="{{ path }}" id="meme-image" alt="Generated Meme" style="max-width: 100%; height: auto;" />
+    
+    <div class="meme-actions" style="margin-top: 20px;">
+        <a href="{{ path }}" download="my-meme.jpg" class="btn btn-success btn-lg">
+            Download Meme
+        </a>
+    </div>
+</div>
+
+<style>
+    .meme-container {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .meme-actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        text-decoration: none;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    @media (max-width: 576px) {
+        .meme-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 200px;
+            margin: 5px 0;
+        }
+    }
+</style>
+{% endblock %}

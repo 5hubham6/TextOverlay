@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: textoverlay
+      POSTGRES_USER: textuser  
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-defaultpass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Main application  
+  textoverlay-app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://${DB_USER:-textuser}:${DB_PASSWORD:-defaultpass}@postgres:5432/${DB_NAME:-textoverlay}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
+      - FLASK_ENV=production
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - ./static:/app/static
+      - ./tmp:/app/tmp
+      - ./_data:/app/_data
+
+volumes:
+  redis_data:
+  postgres_data:

@@ -1,0 +1,31 @@
+{
+  "name": "memegenerator",
+  "version": "1.0.0",
+  "description": "Was getting bored one day and this idea came to mind - a simple web app for putting text on images. Started as just a quick project but ended up adding more features as I went along.",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static/css/styles.css -o ./static/css/output.css",
+    "watch-css": "tailwindcss -i ./static/css/styles.css -o ./static/css/output.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5hubham6/TextOverlay.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/5hubham6/TextOverlay/issues"
+  },
+  "homepage": "https://github.com/5hubham6/TextOverlay#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
+  },
+  "dependencies": {
+    "fabric": "^6.7.1"
+  }
+}

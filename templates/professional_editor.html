@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextOverlay - Professional Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                            800: '#075985', 900: '#0c4a6e'
+                        },
+                        accent: {
+                            50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4',
+                            400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d',
+                            800: '#9d174d', 900: '#831843'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .canvas-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-pink-50 min-h-screen font-sans">
+    
+    <!-- Header -->
+    <header class="glass-effect border-b border-white/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-font text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-slate-800">TextOverlay</h1>
+                        <p class="text-sm text-slate-500">Professional Editor</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <button class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Save</span>
+                    </button>
+                    <button class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-80px)]">
+        
+        <!-- Left Sidebar - Tools -->
+        <aside class="w-80 glass-effect border-r border-white/20 p-6 overflow-y-auto">
+            <div class="space-y-6">
+                
+                <!-- Image Upload Section -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
+                        <i class="fas fa-image text-primary-500"></i>
+                        <span>Image Source</span>
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex space-x-2">
+                            <input type="radio" id="url_source" name="image_source" value="url" checked class="mt-1">
+                            <label for="url_source" class="flex-1">
+                                <div class="text-sm font-medium text-slate-700">Image URL</div>
+                                <div class="text-xs text-slate-500">Load from web</div>
+                            </label>
+                        </div>
+                        
+                        <input type="url" 
+                               id="image_url" 
+                               placeholder="https://example.com/image.jpg"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        
+                        <button onclick="loadImageFromUrl()" 
+                                class="w-full px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center space-x-2">
+                            <i class="fas fa-cloud-download-alt"></i>
+                            <span>Load Image</span>
+                        </button>
+                        
+                        <div class="border-t border-slate-200 pt-4">
+                            <div class="flex space-x-2">
+                                <input type="radio" id="file_source" name="image_source" value="file" class="mt-1">
+                                <label for="file_source" class="flex-1">
+                                    <div class="text-sm font-medium text-slate-700">Upload File</div>
+                                    <div class="text-xs text-slate-500">From your device</div>
+                                </label>
+                            </div>
+                            
+                            <div class="mt-4 border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-primary-400 transition-all duration-200 cursor-pointer" 
+                                 onclick="document.getElementById('image_file').click()">
+                                <i class="fas fa-upload text-slate-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-slate-600">Drop image here or click to browse</p>
+                                <input type="file" id="image_file" accept="image/*" class="hidden">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Content Section -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
+                        <i class="fas fa-edit text-accent-500"></i>
+                        <span>Text Content</span>
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Quote Text</label>
+                            <textarea id="quote_text" 
+                                      rows="3" 
+                                      placeholder="Enter your text here..."
+                                      class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Author (Optional)</label>
+                            <input type="text" 
+                                   id="author_text" 
+                                   placeholder="Author name"
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Styling Controls -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
+                        <i class="fas fa-palette text-primary-500"></i>
+                        <span>Text Styling</span>
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-2">Font Family</label>
+                                <select id="font_family" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option value="Impact">Impact</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Georgia">Georgia</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-2">Font Size</label>
+                                <input type="range" id="font_size" min="12" max="72" value="30" 
+                                       class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="text-xs text-slate-500 mt-1">30px</div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-2">Text Color</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" id="text_color" value="#ffffff" class="w-12 h-10 rounded-lg border-2 border-slate-300">
+                                <div class="flex-1">
+                                    <div class="grid grid-cols-6 gap-2">
+                                        <button class="w-8 h-8 rounded-lg bg-white border-2 border-slate-300" onclick="setTextColor('#ffffff')"></button>
+                                        <button class="w-8 h-8 rounded-lg bg-black" onclick="setTextColor('#000000')"></button>
+                                        <button class="w-8 h-8 rounded-lg bg-primary-500" onclick="setTextColor('#0ea5e9')"></button>
+                                        <button class="w-8 h-8 rounded-lg bg-accent-500" onclick="setTextColor('#ec4899')"></button>
+                                        <button class="w-8 h-8 rounded-lg bg-green-500" onclick="setTextColor('#10b981')"></button>
+                                        <button class="w-8 h-8 rounded-lg bg-yellow-500" onclick="setTextColor('#f59e0b')"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-slate-700">Text Outline</label>
+                            <input type="checkbox" id="add_outline" checked 
+                                   class="w-5 h-5 text-primary-500 bg-slate-100 border-slate-300 rounded focus:ring-primary-500">
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="flex-1 p-6">
+            <div class="h-full flex flex-col">
+                <div class="flex-1 canvas-container rounded-2xl border-2 border-dashed border-slate-300 hover:border-primary-400 transition-all duration-300 flex items-center justify-center">
+                    <canvas id="meme-canvas" 
+                            class="max-w-full max-h-full rounded-xl shadow-lg cursor-crosshair"
+                            style="max-height: calc(100vh - 200px);"></canvas>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-state" class="text-center">
+                        <div class="w-24 h-24 bg-gradient-to-r from-primary-100 to-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-image text-3xl text-primary-400"></i>
+                        </div>
+                        <h3 class="text-xl font-medium text-slate-700 mb-2">Upload an image to get started</h3>
+                        <p class="text-slate-500">Choose an image from URL or upload from your device</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel - Layers & History -->
+        <aside class="w-72 glass-effect border-l border-white/20 p-6 overflow-y-auto">
+            <div class="space-y-6">
+                
+                <!-- Quick Actions -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="p-3 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-all duration-200 text-center">
+                            <i class="fas fa-undo block mb-1"></i>
+                            <span class="text-xs">Undo</span>
+                        </button>
+                        <button class="p-3 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-all duration-200 text-center">
+                            <i class="fas fa-redo block mb-1"></i>
+                            <span class="text-xs">Redo</span>
+                        </button>
+                        <button class="p-3 bg-accent-50 hover:bg-accent-100 text-accent-700 rounded-lg transition-all duration-200 text-center">
+                            <i class="fas fa-magic block mb-1"></i>
+                            <span class="text-xs">Auto Fit</span>
+                        </button>
+                        <button class="p-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg transition-all duration-200 text-center">
+                            <i class="fas fa-eraser block mb-1"></i>
+                            <span class="text-xs">Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Position Controls -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Position</h3>
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Top Left</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Top Center</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Top Right</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Middle Left</button>
+                        <button class="p-2 bg-primary-100 bg-primary-200 rounded text-center text-xs text-primary-700">Center</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Middle Right</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Bottom Left</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Bottom Center</button>
+                        <button class="p-2 bg-slate-100 hover:bg-slate-200 rounded text-center text-xs">Bottom Right</button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">X Position (%)</label>
+                            <input type="range" id="position_x" min="0" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Y Position (%)</label>
+                            <input type="range" id="position_y" min="0" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="bg-white/60 rounded-xl p-6 border border-white/40">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Export</h3>
+                    <div class="space-y-3">
+                        <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+                            <option>PNG (High Quality)</option>
+                            <option>JPG (Compressed)</option>
+                            <option>WebP (Modern)</option>
+                        </select>
+                        
+                        <select class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+                            <option>Original Size</option>
+                            <option>1080x1080 (Instagram)</option>
+                            <option>1920x1080 (HD)</option>
+                            <option>800x600 (Web)</option>
+                        </select>
+                        
+                        <button class="w-full px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-lg transition-all duration-200 font-medium">
+                            Download Image
+                        </button>
+                    </div>
+                </div>
+                
+            </div>
+        </aside>
+        
+    </div>
+
+    <script>
+        // Professional TextOverlay Editor JavaScript
+        let canvas, ctx, image, isDragging = false, dragIndex = -1;
+        let textElements = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('meme-canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Initialize canvas
+            canvas.width = 800;
+            canvas.height = 600;
+            
+            // Event listeners
+            setupEventListeners();
+            
+            // Initial render
+            updateCanvas();
+        });
+        
+        function setupEventListeners() {
+            document.getElementById('quote_text').addEventListener('input', updateCanvas);
+            document.getElementById('author_text').addEventListener('input', updateCanvas);
+            document.getElementById('font_size').addEventListener('input', function() {
+                document.querySelector('label + div').textContent = this.value + 'px';
+                updateCanvas();
+            });
+            document.getElementById('text_color').addEventListener('change', updateCanvas);
+            document.getElementById('font_family').addEventListener('change', updateCanvas);
+            document.getElementById('add_outline').addEventListener('change', updateCanvas);
+            
+            // Canvas interactions
+            canvas.addEventListener('mousedown', startDrag);
+            canvas.addEventListener('mousemove', drag);
+            canvas.addEventListener('mouseup', endDrag);
+            
+            // Image source toggle
+            document.querySelectorAll('input[name="image_source"]').forEach(radio => {
+                radio.addEventListener('change', toggleImageSource);
+            });
+            
+            // File upload
+            document.getElementById('image_file').addEventListener('change', handleFileUpload);
+        }
+        
+        function toggleImageSource() {
+            // Implementation for switching between URL and file upload
+        }
+        
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    loadImageFromData(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function loadImageFromUrl() {
+            const url = document.getElementById('image_url').value;
+            if (url) {
+                loadImageFromData(url);
+            }
+        }
+        
+        function loadImageFromData(src) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                image = img;
+                resizeCanvasToImage();
+                updateCanvas();
+                document.getElementById('empty-state').style.display = 'none';
+            };
+            img.onerror = function() {
+                alert('Failed to load image. Please check the URL or try a different image.');
+            };
+            img.src = src;
+        }
+        
+        function resizeCanvasToImage() {
+            if (!image) return;
+            
+            const maxWidth = 800;
+            const maxHeight = 600;
+            
+            let { width, height } = image;
+            
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+        }
+        
+        function updateCanvas() {
+            if (!ctx) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw image if loaded
+            if (image) {
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            }
+            
+            // Draw text
+            drawText();
+        }
+        
+        function drawText() {
+            const text = document.getElementById('quote_text').value;
+            const author = document.getElementById('author_text').value;
+            
+            if (!text) return;
+            
+            const fontSize = document.getElementById('font_size').value;
+            const fontFamily = document.getElementById('font_family').value;
+            const color = document.getElementById('text_color').value;
+            const outline = document.getElementById('add_outline').checked;
+            
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            
+            const x = canvas.width / 2;
+            const y = canvas.height * 0.7;
+            
+            if (outline) {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.strokeText(text, x, y);
+            }
+            
+            ctx.fillText(text, x, y);
+            
+            if (author) {
+                ctx.font = `${fontSize * 0.7}px ${fontFamily}`;
+                const authorY = y + fontSize * 1.2;
+                
+                if (outline) {
+                    ctx.strokeText(`- ${author}`, x, authorY);
+                }
+                ctx.fillText(`- ${author}`, x, authorY);
+            }
+        }
+        
+        function setTextColor(color) {
+            document.getElementById('text_color').value = color;
+            updateCanvas();
+        }
+        
+        function startDrag(e) {
+            // Drag functionality implementation
+        }
+        
+        function drag(e) {
+            // Drag functionality implementation
+        }
+        
+        function endDrag(e) {
+            // Drag functionality implementation
+        }
+        
+        // Show empty state initially
+        if (!image) {
+            document.getElementById('empty-state').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

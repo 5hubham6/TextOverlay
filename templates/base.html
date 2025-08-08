@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">        
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+            }
+
+            .nav {
+                display: inline;
+                padding: 60px;
+            }
+
+            img {
+                border: 1px solid rgba(0,0,0,.125);
+                border-radius: .25rem;
+                }
+        </style>
+    </head>
+    <body>
+        {% block body %}{% endblock %}
+
+        <div class="nav">
+            <a class="btn btn-secondary" href="{{url_for('landing_page')}}">← Back to Home</a>
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% block title %}TextOverlay Advanced Editor{% endblock %}
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Panel - Controls -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Advanced Editor</h5>
+                    
+                    <form id="meme-form">
+                        <!-- Image Source -->
+                        <div class="form-group">
+                            <label>Image Source</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="image_source" id="url_source" value="url" checked>
+                                <label class="form-check-label" for="url_source">URL</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="image_source" id="file_source" value="file">
+                                <label class="form-check-label" for="file_source">Upload File</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="url_input">
+                            <input type="url" class="form-control" id="image_url" placeholder="Image URL" required>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="loadImageFromUrl()">
+                                <span class="button-text">Load Image</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                            <small class="form-text text-muted">Supports direct image URLs (JPG, PNG, GIF)</small>
+                        </div>
+                        
+                        <div class="form-group" id="file_input" style="display: none;">
+                            <input type="file" class="form-control-file" id="image_file" accept="image/*">
+                        </div>
+                        
+                        <!-- Text Controls -->
+                        <div class="form-group">
+                            <label for="quote_text">Quote Text</label>
+                            <textarea class="form-control" id="quote_text" rows="3" placeholder="Enter your quote" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="author_text">Author (Optional)</label>
+                            <input type="text" class="form-control" id="author_text" placeholder="Author name (leave blank if no author)">
+                        </div>
+                        
+                        <!-- Styling Controls -->
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="font_size">Font Size</label>
+                                    <input type="range" class="form-control-range" id="font_size" min="20" max="100" value="40">
+                                    <small class="form-text text-muted"><span id="font_size_value">40</span>px</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="text_color">Text Color</label>
+                                    <select class="form-control" id="text_color">
+                                        <option value="white" selected>White</option>
+                                        <option value="black">Black</option>
+                                        <option value="red">Red</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="green">Green</option>
+                                        <option value="yellow">Yellow</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="orange">Orange</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="font_family">Font Style</label>
+                            <select class="form-control" id="font_family">
+                                <option value="Arial">Arial (Clean & Modern)</option>
+                                <option value="Impact" selected>Impact (Bold & Strong)</option>
+                                <option value="Georgia">Georgia (Elegant & Classic)</option>
+                                <option value="Times New Roman">Times New Roman (Traditional)</option>
+                                <option value="Trebuchet MS">Trebuchet MS (Friendly)</option>
+                                <option value="Courier New">Courier New (Typewriter)</option>
+                                <option value="Comic Sans MS">Comic Sans MS (Playful)</option>
+                                <option value="Helvetica">Helvetica (Professional)</option>
+                                <option value="Verdana">Verdana (Web Safe)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="add_outline" checked>
+                            <label class="form-check-label" for="add_outline">Add text outline</label>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="button" class="btn btn-primary" onclick="generateMeme()">Generate Final Meme</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetEditor()">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel - Canvas Editor -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Preview & Edit</h5>
+                    <p class="text-muted">Drag the text to position it anywhere on the image</p>
+                    
+                    <div id="canvas-container" style="position: relative; display: inline-block; border: 2px dashed #ccc; min-height: 400px; width: 100%;">
+                        <canvas id="meme-canvas" style="max-width: 100%; cursor: crosshair;"></canvas>
+                        <div id="no-image-message" style="padding: 50px; text-align: center; color: #666;">
+                            <i class="fas fa-image" style="font-size: 3em; margin-bottom: 20px;"></i>
+                            <p>Load an image to start editing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container-fluid {
+        padding: 20px;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .row {
+        height: calc(100vh - 40px);
+    }
+    
+    .col-md-4 {
+        height: 100%;
+        overflow-y: auto;
+        padding-right: 15px;
+    }
+    
+    .col-md-8 {
+        height: 100%;
+        overflow-y: auto;
+        padding-left: 15px;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+        height: fit-content;
+    }
+    
+    #canvas-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
+    }
+    
+    #meme-canvas {
+        display: none;
+        border-radius: 8px;
+    }
+    
+    .form-control-range {
+        width: 100%;
+    }
+    
+    .draggable-text {
+        position: absolute;
+        cursor: move;
+        user-select: none;
+        background: rgba(0,0,0,0.1);
+        padding: 5px;
+        border-radius: 3px;
+        border: 1px dashed rgba(255,255,255,0.5);
+    }
+</style>
+
+<script>
+    let canvas, ctx, image, isDragging = false, dragIndex = -1;
+    let textElements = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        canvas = document.getElementById('meme-canvas');
+        ctx = canvas.getContext('2d');
+        
+        // Radio button toggle
+        document.getElementById('url_source').addEventListener('change', toggleInputs);
+        document.getElementById('file_source').addEventListener('change', toggleInputs);
+        
+        // File input handler
+        document.getElementById('image_file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) loadImageFromFile(file);
+        });
+        
+        // Real-time updates
+        document.getElementById('quote_text').addEventListener('input', updateCanvas);
+        document.getElementById('author_text').addEventListener('input', updateCanvas);
+        document.getElementById('font_size').addEventListener('input', function() {
+            document.getElementById('font_size_value').textContent = this.value;
+            updateCanvas();
+        });
+        document.getElementById('text_color').addEventListener('change', updateCanvas);
+        document.getElementById('font_family').addEventListener('change', updateCanvas);
+        document.getElementById('add_outline').addEventListener('change', updateCanvas);
+        
+        // Canvas interaction
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('mousemove', drag);
+        canvas.addEventListener('mouseup', endDrag);
+        
+        toggleInputs();
+    });
+    
+    function toggleInputs() {
+        const urlRadio = document.getElementById('url_source');
+        const urlInput = document.getElementById('url_input');
+        const fileInput = document.getElementById('file_input');
+        
+        if (urlRadio.checked) {
+            urlInput.style.display = 'block';
+            fileInput.style.display = 'none';
+        } else {
+            urlInput.style.display = 'none';
+            fileInput.style.display = 'block';
+        }
+    }
+    
+    function loadImageFromUrl() {
+        const url = document.getElementById('image_url').value;
+        if (!url) {
+            alert('Please enter an image URL');
+            return;
+        }
+        
+        // Show loading state
+        const button = event.target;
+        const buttonText = button.querySelector('.button-text');
+        const spinner = button.querySelector('.spinner-border');
+        
+        buttonText.textContent = 'Loading...';
+        spinner.classList.remove('d-none');
+        button.disabled = true;
+        
+        function resetButton() {
+            buttonText.textContent = 'Load Image';
+            spinner.classList.add('d-none');
+            button.disabled = false;
+        }
+        
+        function tryDirectLoad() {
+            console.log('Trying direct image load...');
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                console.log('Direct load successful');
+                image = img;
+                setupCanvas();
+                updateCanvas();
+                resetButton();
+            };
+            img.onerror = function() {
+                console.log('Direct load failed');
+                alert('Could not load image from URL. This image may have CORS restrictions or be inaccessible.\n\nSuggestions:\n• Try a different image URL\n• Use the file upload option instead\n• Check if the URL works in a new browser tab');
+                resetButton();
+            };
+            img.src = url;
+        }
+        
+        // First, try to fetch the image through our proxy
+        const proxyUrl = `/proxy-image?url=${encodeURIComponent(url)}`;
+        console.log('Trying proxy load...', proxyUrl);
+        
+        fetch(proxyUrl)
+            .then(response => {
+                console.log('Proxy response status:', response.status);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server error (${response.status}): ${text}`);
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                console.log('Proxy load successful, blob size:', blob.size);
+                const img = new Image();
+                img.onload = function() {
+                    image = img;
+                    setupCanvas();
+                    updateCanvas();
+                    resetButton();
+                };
+                img.onerror = function() {
+                    console.log('Blob to image conversion failed, trying direct load');
+                    tryDirectLoad();
+                };
+                img.src = URL.createObjectURL(blob);
+            })
+            .catch(error => {
+                console.error('Proxy load failed:', error);
+                console.log('Falling back to direct load');
+                tryDirectLoad();
+            });
+    }
+    
+    function loadImageFromFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                image = img;
+                setupCanvas();
+                updateCanvas();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function setupCanvas() {
+        const maxWidth = 600;
+        const ratio = maxWidth / image.width;
+        const displayHeight = image.height * ratio;
+        
+        canvas.width = maxWidth;
+        canvas.height = displayHeight;
+        canvas.style.display = 'block';
+        canvas.style.maxWidth = '100%';
+        
+        document.getElementById('no-image-message').style.display = 'none';
+        
+        // Initialize text positions
+        textElements = [
+            { x: maxWidth / 2, y: displayHeight / 2, type: 'quote' },
+            { x: maxWidth / 2, y: displayHeight / 2 + 60, type: 'author' }
+        ];
+    }
+    
+    function updateCanvas() {
+        if (!image || !canvas) return;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw image
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        
+        // Get text values
+        const quoteText = document.getElementById('quote_text').value;
+        const authorText = document.getElementById('author_text').value;
+        const fontSize = parseInt(document.getElementById('font_size').value);
+        const textColor = document.getElementById('text_color').value;
+        const fontFamily = document.getElementById('font_family').value;
+        const addOutline = document.getElementById('add_outline').checked;
+        
+        // Set font with selected family
+        ctx.font = `${fontSize}px "${fontFamily}", Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        
+        // Color mapping
+        const colorMap = {
+            'white': '#FFFFFF', 'black': '#000000', 'red': '#FF0000',
+            'blue': '#0000FF', 'green': '#00FF00', 'yellow': '#FFFF00',
+            'purple': '#800080', 'orange': '#FFA500'
+        };
+        
+        // Draw text elements
+        textElements.forEach((element, index) => {
+            let text = '';
+            if (element.type === 'quote') {
+                text = quoteText;
+            } else if (element.type === 'author' && authorText.trim()) {
+                text = `- ${authorText}`;
+            }
+            
+            if (!text) return;
+            
+            const lines = wrapText(text, canvas.width - 40);
+            
+            lines.forEach((line, lineIndex) => {
+                const x = element.x;
+                const y = element.y + (lineIndex * (fontSize + 5));
+                
+                if (addOutline) {
+                    // Draw outline
+                    ctx.strokeStyle = textColor === 'white' ? '#000000' : '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    ctx.strokeText(line, x, y);
+                }
+                
+                // Draw text
+                ctx.fillStyle = colorMap[textColor] || '#FFFFFF';
+                ctx.fillText(line, x, y);
+            });
+        });
+    }
+    
+    function wrapText(text, maxWidth) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+        
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + ' ' + word).width;
+            if (width < maxWidth) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+    
+    function startDrag(e) {
+        if (!image) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Check if clicking on text
+        textElements.forEach((element, index) => {
+            if (Math.abs(x - element.x) < 100 && Math.abs(y - element.y) < 50) {
+                isDragging = true;
+                dragIndex = index;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+    }
+    
+    function drag(e) {
+        if (!isDragging || dragIndex === -1) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        textElements[dragIndex].x = Math.max(50, Math.min(canvas.width - 50, x));
+        textElements[dragIndex].y = Math.max(30, Math.min(canvas.height - 30, y));
+        
+        updateCanvas();
+    }
+    
+    function endDrag() {
+        isDragging = false;
+        dragIndex = -1;
+        canvas.style.cursor = 'crosshair';
+    }
+    
+    function generateMeme() {
+        if (!image) {
+            alert('Please load an image first');
+            return;
+        }
+        
+        const quoteText = document.getElementById('quote_text').value;
+        const authorText = document.getElementById('author_text').value;
+        
+        if (!quoteText) {
+            alert('Please enter quote text');
+            return;
+        }
+        
+        // Convert canvas positions to percentages for server processing
+        const positionX = Math.round((textElements[0].x / canvas.width) * 100);
+        const positionY = Math.round((textElements[0].y / canvas.height) * 100);
+        
+        // Create form data
+        const formData = new FormData();
+        
+        if (document.getElementById('url_source').checked) {
+            formData.append('image_source', 'url');
+            formData.append('image_url', document.getElementById('image_url').value);
+        } else {
+            formData.append('image_source', 'file');
+            formData.append('image_file', document.getElementById('image_file').files[0]);
+        }
+        
+        formData.append('body', quoteText);
+        formData.append('author', authorText || ''); // Send empty string if no author
+        formData.append('font_size', document.getElementById('font_size').value);
+        formData.append('font_family', document.getElementById('font_family').value);
+        formData.append('text_color', document.getElementById('text_color').value);
+        formData.append('text_position_x', positionX);
+        formData.append('text_position_y', positionY);
+        
+        if (document.getElementById('add_outline').checked) {
+            formData.append('add_outline', 'on');
+        }
+        
+        // Submit to server
+        fetch('/create', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Open result in new window or redirect
+            const newWindow = window.open();
+            newWindow.document.write(html);
+        })
+        .catch(error => {
+            alert('Error generating meme: ' + error.message);
+        });
+    }
+    
+    function resetEditor() {
+        document.getElementById('meme-form').reset();
+        canvas.style.display = 'none';
+        document.getElementById('no-image-message').style.display = 'block';
+        image = null;
+        textElements = [];
+        document.getElementById('font_size_value').textContent = '40';
+        toggleInputs();
+    }
+</script>
+
+{% endblock %}

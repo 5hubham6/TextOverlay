@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Editor - TextOverlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .shiny-black-gradient {
+            background: linear-gradient(145deg, #1f2937 0%, #374151 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .shiny-gray-light {
+            background: linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .shiny-gray-dark {
+            background: linear-gradient(145deg, #374151 0%, #1f2937 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #374151 0%, #111827 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .professional-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .info-panel {
+            transition: all 0.6s ease;
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .info-panel.fade-out {
+            transform: translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .info-panel.hidden {
+            display: none !important;
+        }
+        #preview-panel {
+            transition: all 0.6s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        #preview-panel.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -8px, 0);
+            }
+            70% {
+                transform: translate3d(0, -4px, 0);
+            }
+            90% {
+                transform: translate3d(0, -2px, 0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-outfit">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-full mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.location.href='/'" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </button>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 shiny-black-gradient rounded-lg flex items-center justify-center border border-gray-300">
+                            <i class="fas fa-edit text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold gradient-text">Quick Editor</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/canvas_creator" class="shiny-gray-dark text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all text-sm border border-gray-500">
+                        <i class="fas fa-palette mr-1"></i>
+                        Canvas Editor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Panel - Form -->
+            <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-image text-gray-600 mr-3"></i>
+                    Create Your Design
+                </h2>
+                
+                <form action="{{url_for('meme_post')}}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <!-- Image Source -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Image Source</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="image_source" value="url" checked class="mr-3">
+                                <div>
+                                    <div class="font-medium text-gray-800">Image URL</div>
+                                    <div class="text-sm text-gray-500">Paste link from web</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="image_source" value="file" class="mr-3">
+                                <div>
+                                    <div class="font-medium text-gray-800">Upload File</div>
+                                    <div class="text-sm text-gray-500">From your device</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Image URL Input -->
+                    <div id="url_input">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+                        <div class="flex gap-2">
+                            <input type="url" name="image_url" placeholder="https://picsum.photos/800/600" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                            <button type="button" id="loadImageBtn" class="px-6 py-3 shiny-black-gradient text-white rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 whitespace-nowrap">
+                                <i class="fas fa-download"></i>
+                                <span>Load</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- File Upload -->
+                    <div id="file_input" style="display: none;">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Image</label>
+                        <input type="file" name="image_file" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                        <p class="text-sm text-gray-500 mt-1">Supports JPG, PNG, GIF files</p>
+                    </div>
+                    
+                    <!-- Text Content -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Text Content</label>
+                        <textarea name="body" required placeholder="Enter your text here..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none h-24"></textarea>
+                    </div>
+                    
+                    <!-- Author (Optional) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Author <span class="text-gray-400">(Optional)</span></label>
+                        <input type="text" name="author" placeholder="Author name..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                    </div>
+                    
+                    <!-- Styling Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Font Size -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Font Size</label>
+                            <select name="font_size" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500">
+                                <option value="20">Small (20px)</option>
+                                <option value="30" selected>Medium (30px)</option>
+                                <option value="40">Large (40px)</option>
+                                <option value="50">Extra Large (50px)</option>
+                                <option value="60">Huge (60px)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Text Color -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Text Color</label>
+                            <select name="text_color" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500">
+                                <option value="white" selected>White</option>
+                                <option value="black">Black</option>
+                                <option value="gray">Gray</option>
+                                <option value="red">Red</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="yellow">Yellow</option>
+                                <option value="purple">Purple</option>
+                                <option value="orange">Orange</option>
+                                <option value="pink">Pink</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Font Family -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Font Style</label>
+                        <select name="font_family" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500">
+                            <option value="Arial">Arial - Clean & Modern</option>
+                            <option value="Impact" selected>Impact - Bold & Strong</option>
+                            <option value="Georgia">Georgia - Elegant & Classic</option>
+                            <option value="Times New Roman">Times New Roman - Traditional</option>
+                            <option value="Trebuchet MS">Trebuchet MS - Friendly</option>
+                            <option value="Courier New">Courier New - Typewriter</option>
+                            <option value="Helvetica">Helvetica - Professional</option>
+                            <option value="Verdana">Verdana - Web Safe</option>
+                            <option value="Outfit">Outfit - Modern Sans</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Position Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Horizontal Position</label>
+                            <input type="range" name="text_position_x" min="0" max="100" value="50" class="w-full accent-gray-600">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Left</span>
+                                <span>Center</span>
+                                <span>Right</span>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1" id="x-value">50%</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Vertical Position</label>
+                            <input type="range" name="text_position_y" min="0" max="100" value="50" class="w-full accent-gray-600">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Top</span>
+                                <span>Middle</span>
+                                <span>Bottom</span>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1" id="y-value">50%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Enhancement -->
+                    <div>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="add_outline" checked class="mr-3 rounded">
+                            <span class="text-sm font-medium text-gray-700">Add text outline for better readability</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-4 pt-4">
+                        <button type="submit" class="flex-1 shiny-black-gradient text-white py-3 rounded-lg hover:shadow-lg transition-all font-semibold border border-gray-300">
+                            <i class="fas fa-magic mr-2"></i>
+                            Create Image
+                        </button>
+                        <button type="button" onclick="document.querySelector('form').reset()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Right Panel - Preview & Tips -->
+            <div class="space-y-6" id="info-panels">
+                <!-- Live Preview (Hidden initially) -->
+                <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-6" id="preview-panel" style="display: none;">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-eye text-blue-500 mr-2"></i>
+                        Live Preview
+                    </h3>
+                    <div class="relative bg-gray-50 rounded-lg p-4" id="preview-container">
+                        <div class="relative inline-block">
+                            <canvas id="preview-canvas" class="max-w-full h-auto rounded border border-gray-200 cursor-crosshair"></canvas>
+                            <div id="preview-loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded">
+                                <div class="text-center">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                                    <p class="text-sm text-gray-600">Loading image...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>🎯 Click and drag to move text • Use sliders for precise positioning</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Tips -->
+                <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-6 info-panel" id="tips-panel">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        Quick Tips
+                    </h3>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check text-green-500 mt-1"></i>
+                            <span>Use high-resolution images for better quality</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check text-green-500 mt-1"></i>
+                            <span>Text outline helps readability on complex backgrounds</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check text-green-500 mt-1"></i>
+                            <span>Try different font sizes to find the perfect fit</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check text-green-500 mt-1"></i>
+                            <span>Position sliders help place text precisely</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features -->
+                <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-6 info-panel" id="features-panel">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-star text-blue-500 mr-2"></i>
+                        Features
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-font text-gray-600 text-xl mb-2"></i>
+                            <div class="text-sm font-medium text-gray-800">Multiple Fonts</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-palette text-gray-600 text-xl mb-2"></i>
+                            <div class="text-sm font-medium text-gray-800">Color Options</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-crosshairs text-gray-600 text-xl mb-2"></i>
+                            <div class="text-sm font-medium text-gray-800">Precise Positioning</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-shield-alt text-gray-600 text-xl mb-2"></i>
+                            <div class="text-sm font-medium text-gray-800">Text Outline</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Need More Features? -->
+                <div class="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-2xl p-6 text-white info-panel" id="advanced-panel">
+                    <h3 class="text-lg font-bold mb-2">Need More Features?</h3>
+                    <p class="text-gray-300 text-sm mb-4">Try our Canvas Editor for advanced layer management, effects, and drag-and-drop editing.</p>
+                    <a href="/canvas_creator" class="inline-flex items-center bg-white text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors text-sm font-semibold">
+                        <i class="fas fa-palette mr-2"></i>
+                        Open Canvas Editor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all elements
+            const urlRadio = document.querySelector('input[value="url"]');
+            const fileRadio = document.querySelector('input[value="file"]');
+            const urlInput = document.getElementById('url_input');
+            const fileInput = document.getElementById('file_input');
+            const imageUrlField = document.querySelector('input[name="image_url"]');
+            const imageFileField = document.querySelector('input[name="image_file"]');
+            
+            // Preview elements
+            const previewPanel = document.getElementById('preview-panel');
+            const previewCanvas = document.getElementById('preview-canvas');
+            const previewLoading = document.getElementById('preview-loading');
+            
+            // Text controls
+            const textArea = document.querySelector('textarea[name="body"]');
+            const textColor = document.querySelector('select[name="text_color"]');
+            const fontSize = document.querySelector('select[name="font_size"]');
+            const fontFamily = document.querySelector('select[name="font_family"]');
+            const positionX = document.querySelector('input[name="text_position_x"]');
+            const positionY = document.querySelector('input[name="text_position_y"]');
+            
+            // Info panels
+            const infoPanels = document.querySelectorAll('.info-panel');
+            
+            let currentImage = null;
+            let ctx = null;
+            let isDragging = false;
+            let textX = 50; // Percentage
+            let textY = 50; // Percentage
+            
+            // Sample templates
+            const samples = {
+                motivational: {
+                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+                    text: 'SUCCESS IS NOT FINAL\nFAILURE IS NOT FATAL\nIT IS THE COURAGE TO CONTINUE\nTHAT COUNTS',
+                    color: 'white',
+                    size: '48',
+                    family: 'Impact',
+                    x: '50',
+                    y: '50'
+                },
+                funny: {
+                    image: 'https://images.unsplash.com/photo-1415604934674-561df9abf539?w=800&h=600&fit=crop',
+                    text: 'WHEN YOU FINALLY FIX\nTHE BUG THAT\'S BEEN\nBUGGING YOU ALL DAY',
+                    color: 'white',
+                    size: '36',
+                    family: 'Arial',
+                    x: '50',
+                    y: '20'
+                },
+                announcement: {
+                    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+                    text: 'IMPORTANT ANNOUNCEMENT\n\nEvent: Team Meeting\nDate: Tomorrow\nTime: 3:00 PM',
+                    color: 'white',
+                    size: '32',
+                    family: 'Arial',
+                    x: '50',
+                    y: '40'
+                }
+            };
+            
+            // Demo steps configuration
+            const demoSteps = [
+                {
+                    title: "📸 Step 1: Choose Your Image",
+                    description: "Start by selecting an image URL or uploading a file",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 What we're doing:</h4>
+                                    <p class="text-gray-700">Loading a beautiful mountain landscape that will serve as our background image.</p>
+                                </div>
+                                
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+                                    <div class="relative">
+                                        <input type="url" value="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                        <div class="absolute right-3 top-3 text-green-500">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                    <i class="fas fa-info-circle text-blue-500"></i>
+                                    <span>The image will load automatically and show a preview</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-4 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="animate-pulse bg-gray-300 rounded-lg w-80 h-60 mb-4"></div>
+                                    <p class="text-gray-500">Image preview will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    action: () => {
+                        // Simulate image selection
+                        urlRadio.checked = true;
+                        toggleInputs();
+                        imageUrlField.value = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop';
+                    }
+                },
+                {
+                    title: "✏️ Step 2: Add Your Text",
+                    description: "Enter your message and customize the styling",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 What we're doing:</h4>
+                                    <p class="text-gray-700">Adding inspirational text with perfect styling for maximum impact.</p>
+                                </div>
+                                
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Text Content</label>
+                                        <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" rows="3" readonly>SUCCESS IS NOT FINAL
+FAILURE IS NOT FATAL
+IT IS THE COURAGE TO CONTINUE</textarea>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Font Size</label>
+                                            <select class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" disabled>
+                                                <option>Extra Large (48px)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Color</label>
+                                            <select class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" disabled>
+                                                <option>White</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                    <i class="fas fa-magic text-purple-500"></i>
+                                    <span>Watch the text appear on your image in real-time!</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-4 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg w-80 h-60 mb-4 flex items-center justify-center text-white font-bold text-sm relative">
+                                        <div class="absolute inset-0 bg-black bg-opacity-20 rounded-lg"></div>
+                                        <div class="relative text-center">
+                                            SUCCESS IS NOT FINAL<br>
+                                            FAILURE IS NOT FATAL<br>
+                                            IT IS THE COURAGE TO CONTINUE
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-500">Live preview with your text</p>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    action: () => {
+                        // Simulate text input and styling
+                        textArea.value = 'SUCCESS IS NOT FINAL\nFAILURE IS NOT FATAL\nIT IS THE COURAGE TO CONTINUE\nTHAT COUNTS';
+                        fontSize.value = '48';
+                        textColor.value = 'white';
+                        fontFamily.value = 'Impact';
+                    }
+                },
+                {
+                    title: "🎯 Step 3: Position & Create",
+                    description: "Fine-tune the text position and generate your image",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 What we're doing:</h4>
+                                    <p class="text-gray-700">Positioning the text perfectly and creating the final image.</p>
+                                </div>
+                                
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Text Position</label>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs text-gray-600 mb-1">Horizontal</label>
+                                                <input type="range" min="0" max="100" value="50" class="w-full accent-green-600" disabled>
+                                                <div class="text-xs text-gray-400 mt-1">50% (Center)</div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-600 mb-1">Vertical</label>
+                                                <input type="range" min="0" max="100" value="50" class="w-full accent-green-600" disabled>
+                                                <div class="text-xs text-gray-400 mt-1">50% (Middle)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pt-4 border-t">
+                                        <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold shadow-lg">
+                                            <i class="fas fa-magic mr-2"></i>
+                                            Create Your Image
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-lightbulb text-yellow-500"></i>
+                                        <span class="font-semibold text-gray-800">Pro Tips:</span>
+                                    </div>
+                                    <ul class="text-sm text-gray-700 space-y-1">
+                                        <li>• Click and drag on the preview to move text</li>
+                                        <li>• Use sliders for precise positioning</li>
+                                        <li>• Text outline ensures readability</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-4 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg w-80 h-60 mb-4 flex items-center justify-center text-white font-bold text-lg relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-black bg-opacity-20 rounded-lg"></div>
+                                        <div class="relative text-center leading-tight">
+                                            SUCCESS IS NOT FINAL<br>
+                                            FAILURE IS NOT FATAL<br>
+                                            <span class="text-yellow-300">IT IS THE COURAGE TO CONTINUE</span>
+                                        </div>
+                                        <div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                                            <i class="fas fa-check mr-1"></i>Ready!
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-500">Perfect positioning achieved!</p>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    action: () => {
+                        // Simulate positioning
+                        positionX.value = '50';
+                        positionY.value = '50';
+                        textX = 50;
+                        textY = 50;
+                        // Trigger preview update if image is loaded
+                        if (currentImage) {
+                            renderPreview();
+                        }
+                    }
+                }
+            ];
+            
+            // Toggle input types
+            function toggleInputs() {
+                if (urlRadio.checked) {
+                    urlInput.style.display = 'block';
+                    fileInput.style.display = 'none';
+                } else if (fileRadio.checked) {
+                    urlInput.style.display = 'none';
+                    fileInput.style.display = 'block';
+                }
+            }
+            
+            // Hide info panels completely
+            // Hide info panels with animation
+            function hideInfoPanels() {
+                infoPanels.forEach(panel => {
+                    panel.classList.add('fade-out');
+                });
+                
+                // Hide completely after animation
+                setTimeout(() => {
+                    infoPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                }, 600);
+            }
+            
+            // Show info panels with animation
+            function showInfoPanels() {
+                infoPanels.forEach(panel => {
+                    panel.classList.remove('hidden');
+                    // Force reflow
+                    panel.offsetHeight;
+                    panel.classList.remove('fade-out');
+                });
+            }
+            
+            // Show preview panel with animation
+            function showPreview() {
+                previewPanel.style.display = 'block';
+                // Force reflow
+                previewPanel.offsetHeight;
+                previewPanel.classList.add('show');
+            }
+            
+            // Hide preview panel with animation
+            function hidePreview() {
+                previewPanel.classList.remove('show');
+                setTimeout(() => {
+                    previewPanel.style.display = 'none';
+                    currentImage = null;
+                }, 600);
+            }
+            
+            // Load image and create preview
+            function loadImage(src) {
+                if (!previewCanvas) return;
+                
+                previewLoading.style.display = 'flex';
+                ctx = previewCanvas.getContext('2d');
+                
+                // Use proxy for external URLs to avoid CORS
+                let imageUrl = src;
+                if (src.startsWith('http://') || src.startsWith('https://')) {
+                    imageUrl = `/proxy-image?url=${encodeURIComponent(src)}`;
+                }
+                
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    // Set canvas size
+                    const maxWidth = 500;
+                    const maxHeight = 400;
+                    
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Scale to fit
+                    const aspectRatio = width / height;
+                    
+                    if (width > maxWidth) {
+                        width = maxWidth;
+                        height = width / aspectRatio;
+                    }
+                    
+                    if (height > maxHeight) {
+                        height = maxHeight;
+                        width = height * aspectRatio;
+                    }
+                    
+                    previewCanvas.width = width;
+                    previewCanvas.height = height;
+                    
+                    currentImage = img;
+                    
+                    // Initial render
+                    renderPreview();
+                    
+                    previewLoading.style.display = 'none';
+                    
+                    // Add real-time text input listeners
+                    addTextUpdateListeners();
+                };
+                
+                img.onerror = function() {
+                    previewLoading.style.display = 'none';
+                    // Show error message
+                    ctx.fillStyle = '#ef4444';
+                    ctx.font = '16px Arial';
+                    ctx.fillText('Failed to load image', 20, 50);
+                };
+                
+                img.src = imageUrl;
+            }
+            
+            // Render preview with current settings
+            function renderPreview() {
+                if (!currentImage || !ctx || !previewCanvas) return;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                
+                // Draw image
+                ctx.drawImage(currentImage, 0, 0, previewCanvas.width, previewCanvas.height);
+                
+                // Draw text if any
+                const text = textArea.value.trim();
+                if (text) {
+                    drawText(text);
+                }
+            }
+            
+            // Draw text on canvas
+            function drawText(text) {
+                if (!ctx) return;
+                
+                const fontSizeVal = parseInt(fontSize ? fontSize.value : '30');
+                const fontFamilyVal = fontFamily ? fontFamily.value : 'Impact';
+                const colorVal = textColor ? textColor.value : 'white';
+                
+                // Set text properties
+                ctx.font = `${fontSizeVal}px ${fontFamilyVal}`;
+                ctx.fillStyle = colorVal;
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Calculate position
+                const x = (textX / 100) * previewCanvas.width;
+                const y = (textY / 100) * previewCanvas.height;
+                
+                // Handle multi-line text
+                const lines = text.split('\n');
+                const lineHeight = fontSizeVal * 1.2;
+                const startY = y - ((lines.length - 1) * lineHeight) / 2;
+                
+                lines.forEach((line, index) => {
+                    const lineY = startY + (index * lineHeight);
+                    // Draw stroke (outline)
+                    ctx.strokeText(line, x, lineY);
+                    // Draw fill
+                    ctx.fillText(line, x, lineY);
+                });
+            }
+            
+            // Add real-time text update listeners
+            function addTextUpdateListeners() {
+                // Remove existing listeners to avoid duplicates
+                const elements = [textArea, textColor, fontSize, fontFamily, positionX, positionY];
+                elements.forEach(el => {
+                    if (el) {
+                        el.removeEventListener('input', renderPreview);
+                        el.removeEventListener('change', renderPreview);
+                    }
+                });
+                
+                // Add new listeners
+                if (textArea) {
+                    textArea.addEventListener('input', renderPreview);
+                    textArea.addEventListener('keyup', renderPreview);
+                }
+                if (textColor) textColor.addEventListener('change', renderPreview);
+                if (fontSize) fontSize.addEventListener('change', renderPreview);
+                if (fontFamily) fontFamily.addEventListener('change', renderPreview);
+                if (positionX) {
+                    positionX.addEventListener('input', () => {
+                        textX = parseInt(positionX.value);
+                        renderPreview();
+                    });
+                }
+                if (positionY) {
+                    positionY.addEventListener('input', () => {
+                        textY = parseInt(positionY.value);
+                        renderPreview();
+                    });
+                }
+            }
+            
+            // Get mouse position relative to canvas
+            function getMousePos(e) {
+                const rect = previewCanvas.getBoundingClientRect();
+                const scaleX = previewCanvas.width / rect.width;
+                const scaleY = previewCanvas.height / rect.height;
+                
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+            
+            // Check if we should show preview
+            function checkForImage() {
+                const hasUrl = imageUrlField.value.trim().length > 0 && 
+                             (imageUrlField.value.startsWith('http://') || imageUrlField.value.startsWith('https://'));
+                const hasFile = imageFileField.files && imageFileField.files.length > 0;
+                
+                if (hasUrl || hasFile) {
+                    hideInfoPanels();
+                    showPreview();
+                    
+                    if (hasUrl) {
+                        loadImage(imageUrlField.value);
+                    } else if (hasFile) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            loadImage(e.target.result);
+                        };
+                        reader.readAsDataURL(imageFileField.files[0]);
+                    }
+                } else {
+                    showInfoPanels();
+                    hidePreview();
+                }
+            }
+            
+            // Update slider values display
+            function updateSliderDisplay() {
+                const xValue = document.getElementById('x-value');
+                const yValue = document.getElementById('y-value');
+                if (xValue) xValue.textContent = Math.round(textX) + '%';
+                if (yValue) yValue.textContent = Math.round(textY) + '%';
+            }
+            
+            // Mouse events for dragging
+            previewCanvas.addEventListener('mousedown', function(e) {
+                if (!currentImage) return;
+                isDragging = true;
+                previewCanvas.style.cursor = 'grabbing';
+                
+                const pos = getMousePos(e);
+                textX = (pos.x / previewCanvas.width) * 100;
+                textY = (pos.y / previewCanvas.height) * 100;
+                
+                // Keep within bounds
+                textX = Math.max(5, Math.min(95, textX));
+                textY = Math.max(10, Math.min(90, textY));
+                
+                renderPreview();
+            });
+            
+            previewCanvas.addEventListener('mousemove', function(e) {
+                if (!isDragging || !currentImage) return;
+                
+                const pos = getMousePos(e);
+                textX = (pos.x / previewCanvas.width) * 100;
+                textY = (pos.y / previewCanvas.height) * 100;
+                
+                // Keep within bounds
+                textX = Math.max(5, Math.min(95, textX));
+                textY = Math.max(10, Math.min(90, textY));
+                
+                renderPreview();
+            });
+            
+            previewCanvas.addEventListener('mouseup', function() {
+                isDragging = false;
+                previewCanvas.style.cursor = 'crosshair';
+            });
+            
+            previewCanvas.addEventListener('mouseleave', function() {
+                isDragging = false;
+                previewCanvas.style.cursor = 'crosshair';
+            });
+            
+            // Event listeners
+            urlRadio.addEventListener('change', toggleInputs);
+            fileRadio.addEventListener('change', toggleInputs);
+            
+            // Demo Functions - removed due to missing HTML elements
+            // function showDemoModal() - removed
+            // function hideDemoModal() - removed
+            
+            function showDemoStep(stepIndex) {
+                currentDemoStep = stepIndex;
+                const step = demoSteps[stepIndex];
+                
+                // Update content
+                demoContent.innerHTML = `
+                    <div class="mb-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-2">${step.title}</h4>
+                        <p class="text-gray-600">${step.description}</p>
+                    </div>
+                    ${step.content}
+                `;
+                
+                // Update progress
+                demoProgress.textContent = `Step ${stepIndex + 1} of ${demoSteps.length}`;
+                
+                // Update step indicators
+                stepIndicators.forEach((indicator, index) => {
+                    if (index <= stepIndex) {
+                        indicator.classList.remove('bg-gray-300');
+                        indicator.classList.add('bg-indigo-500');
+                    } else {
+                        indicator.classList.remove('bg-indigo-500');
+                        indicator.classList.add('bg-gray-300');
+                    }
+                });
+                
+                // Update button states
+                demoPrevBtn.disabled = stepIndex === 0;
+                demoNextBtn.textContent = stepIndex === demoSteps.length - 1 ? 
+                    'Try It Yourself!' : 
+                    'Next';
+                demoNextBtn.innerHTML = stepIndex === demoSteps.length - 1 ? 
+                    'Try It Yourself!<i class="fas fa-rocket ml-2"></i>' : 
+                    'Next<i class="fas fa-chevron-right ml-2"></i>';
+                
+                // Execute step action after a delay for better UX
+                setTimeout(() => {
+                    if (step.action) {
+                        step.action();
+                    }
+                }, 500);
+            }
+            
+            function nextDemoStep() {
+                if (currentDemoStep < demoSteps.length - 1) {
+                    showDemoStep(currentDemoStep + 1);
+                } else {
+                    // Final step - close demo
+                    hideDemoModal();
+                }
+            }
+            
+            function prevDemoStep() {
+                if (currentDemoStep > 0) {
+                    showDemoStep(currentDemoStep - 1);
+                }
+            }
+            
+            function startAutoPlay() {
+                if (isAutoPlaying) {
+                    stopAutoPlay();
+                    return;
+                }
+                
+                isAutoPlaying = true;
+                demoAutoBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pause';
+                demoAutoBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                demoAutoBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+                
+                autoPlayInterval = setInterval(() => {
+                    if (currentDemoStep < demoSteps.length - 1) {
+                        nextDemoStep();
+                    } else {
+                        stopAutoPlay();
+                    }
+                }, 4000); // 4 seconds per step
+            }
+            
+            function stopAutoPlay() {
+                isAutoPlaying = false;
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                }
+                demoAutoBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Auto Play';
+                demoAutoBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                demoAutoBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+            
+            // Try Sample button functionality removed - element doesn't exist
+            
+            // Setup event listeners for form inputs
+            imageUrlField.addEventListener('input', checkForImage);
+            imageUrlField.addEventListener('paste', () => setTimeout(checkForImage, 100));
+            imageFileField.addEventListener('change', checkForImage);
+            
+            // Load Image button
+            document.getElementById('loadImageBtn').addEventListener('click', function() {
+                const url = imageUrlField.value.trim();
+                if (url) {
+                    checkForImage();
+                } else {
+                    // Show error notification
+                    showToast('Please enter an image URL first', 'error');
+                }
+            });
+            
+            // Text changes - use renderPreview instead of updateCanvas
+            textArea.addEventListener('input', renderPreview);
+            textColor.addEventListener('change', renderPreview);
+            fontSize.addEventListener('change', renderPreview);
+            fontFamily.addEventListener('change', renderPreview);
+            
+            // Slider changes
+            positionX.addEventListener('input', () => {
+                textX = parseInt(positionX.value);
+                renderPreview();
+                updateSliderDisplay();
+            });
+            
+            positionY.addEventListener('input', () => {
+                textY = parseInt(positionY.value);
+                renderPreview();
+                updateSliderDisplay();
+            });
+            
+            // Simple toast notification function
+            function showToast(message, type = 'info') {
+                const colors = {
+                    error: 'bg-red-500',
+                    success: 'bg-green-500',
+                    info: 'bg-blue-500'
+                };
+                
+                const toast = document.createElement('div');
+                toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.style.transform = 'translateX(0)', 10);
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+            
+            // Reset button
+            document.querySelector('button[type="button"]').addEventListener('click', () => {
+                setTimeout(() => {
+                    showInfoPanels();
+                    hidePreview();
+                    textX = 50;
+                    textY = 50;
+                    updateSliderDisplay();
+                }, 100);
+            });
+            
+            // Initialize
+            toggleInputs();
+            updateSliderDisplay();
+            
+            // Check if coming from Try Now page with a sample selection
+            const selectedSample = sessionStorage.getItem('selectedSample');
+            if (selectedSample) {
+                // Clear the session storage
+                sessionStorage.removeItem('selectedSample');
+                
+                // Sample data
+                const samples = {
+                    motivational: {
+                        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+                        text: 'SUCCESS IS NOT FINAL\nFAILURE IS NOT FATAL\nIT IS THE COURAGE TO CONTINUE\nTHAT COUNTS',
+                        color: 'white',
+                        size: '48',
+                        family: 'Impact'
+                    },
+                    funny: {
+                        image: 'https://images.unsplash.com/photo-1415604934674-561df9abf539?w=800&h=600&fit=crop',
+                        text: 'WHEN YOU FINALLY FIX\nTHE BUG THAT\'S BEEN\nBUGGING YOU ALL DAY',
+                        color: 'white',
+                        size: '36',
+                        family: 'Arial'
+                    },
+                    announcement: {
+                        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+                        text: 'IMPORTANT ANNOUNCEMENT\n\nEvent: Team Meeting\nDate: Tomorrow\nTime: 3:00 PM',
+                        color: 'white',
+                        size: '32',
+                        family: 'Arial'
+                    }
+                };
+                
+                const sample = samples[selectedSample];
+                if (sample) {
+                    // Auto-fill the form with sample data
+                    setTimeout(() => {
+                        imageUrlField.value = sample.image;
+                        textArea.value = sample.text;
+                        textColor.value = sample.color;
+                        fontSize.value = sample.size;
+                        fontFamily.value = sample.family;
+                        
+                        // Trigger image loading
+                        checkForImage();
+                        
+                        // Show success message
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+                        successMsg.textContent = `✅ ${selectedSample.charAt(0).toUpperCase() + selectedSample.slice(1)} sample loaded!`;
+                        document.body.appendChild(successMsg);
+                        
+                        // Animate in
+                        setTimeout(() => {
+                            successMsg.style.transform = 'translateX(0)';
+                        }, 10);
+                        
+                        // Animate out and remove
+                        setTimeout(() => {
+                            successMsg.style.transform = 'translateX(100%)';
+                            setTimeout(() => {
+                                if (successMsg.parentNode) {
+                                    successMsg.parentNode.removeChild(successMsg);
+                                }
+                            }, 300);
+                        }, 3000);
+                    }, 300);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

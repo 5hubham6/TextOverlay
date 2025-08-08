@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Creator - TextOverlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .shiny-black-gradient {
+            background: linear-gradient(145deg, #1f2937 0%, #374151 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .shiny-gray-light {
+            background: linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .shiny-gray-dark {
+            background: linear-gradient(145deg, #374151 0%, #1f2937 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #374151 0%, #111827 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-outfit">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-full mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.location.href='/'" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </button>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 shiny-black-gradient rounded-lg flex items-center justify-center border border-gray-300">
+                            <i class="fas fa-palette text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold gradient-text">
+                            Canvas Creator
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="downloadBtn" class="shiny-black-gradient text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 border border-gray-300">
+                        <i class="fas fa-download"></i>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Left Sidebar - Tools -->
+        <div class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+            <div class="p-6">
+                
+                <!-- Template Selection -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-magic text-gray-600 mr-2"></i>
+                        Quick Templates
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="template-btn p-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm" data-template="quote">
+                            <i class="fas fa-quote-left text-gray-600 mb-1"></i>
+                            <div>Quote</div>
+                        </button>
+                        <button class="template-btn p-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm" data-template="social">
+                            <i class="fas fa-hashtag text-gray-600 mb-1"></i>
+                            <div>Social</div>
+                        </button>
+                        <button class="template-btn p-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm" data-template="title">
+                            <i class="fas fa-heading text-gray-600 mb-1"></i>
+                            <div>Title</div>
+                        </button>
+                        <button class="template-btn p-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm" data-template="minimal">
+                            <i class="fas fa-minus text-gray-600 mb-1"></i>
+                            <div>Minimal</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-image text-gray-600 mr-2"></i>
+                        Background Image
+                    </h3>
+                    <div class="space-y-3">
+                        <input type="file" id="imageInput" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                        <input type="text" id="imageUrl" placeholder="Or paste image URL" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent">
+                        <button id="loadImageBtn" class="w-full shiny-gray-light text-white py-2 rounded-lg hover:shadow-lg transition-all border border-gray-400">
+                            Load Image
+                        </button>
+                        <button id="generateBgBtn" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                            Generate Gradient
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Text Tools -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-text-height text-gray-600 mr-2"></i>
+                        Add Text
+                    </h3>
+                    <div class="space-y-3">
+                        <textarea id="textInput" placeholder="Enter your text here..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none h-24"></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="addTextBtn" class="shiny-black-gradient text-white py-2 rounded-lg hover:shadow-lg transition-all border border-gray-300 text-sm">
+                                <i class="fas fa-plus mr-1"></i>
+                                Add Text
+                            </button>
+                            <button id="addHeadingBtn" class="shiny-gray-dark text-white py-2 rounded-lg hover:shadow-lg transition-all border border-gray-500 text-sm">
+                                <i class="fas fa-heading mr-1"></i>
+                                Heading
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Styling -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-palette text-gray-600 mr-2"></i>
+                        Text Styling
+                    </h3>
+                    <div class="space-y-4">
+                        <!-- Font Family -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                            <select id="fontFamily" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500">
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Outfit">Outfit</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Roboto">Roboto</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Font Size -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
+                            <input type="range" id="fontSize" min="12" max="200" value="36" class="w-full">
+                            <div class="text-center text-sm text-gray-600 mt-1">
+                                <span id="fontSizeValue">36</span>px
+                            </div>
+                        </div>
+                        
+                        <!-- Text Color -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Text Color</label>
+                            <div class="flex space-x-2 mb-2">
+                                <input type="color" id="textColor" value="#000000" class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                                <input type="text" id="textColorHex" value="#000000" placeholder="#000000" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                            <!-- Color Presets -->
+                            <div class="flex space-x-1">
+                                <button class="w-6 h-6 rounded-full bg-black border border-gray-300" onclick="setQuickColor('#000000')"></button>
+                                <button class="w-6 h-6 rounded-full bg-white border border-gray-300" onclick="setQuickColor('#ffffff')"></button>
+                                <button class="w-6 h-6 rounded-full bg-red-500 border border-gray-300" onclick="setQuickColor('#ef4444')"></button>
+                                <button class="w-6 h-6 rounded-full bg-blue-500 border border-gray-300" onclick="setQuickColor('#3b82f6')"></button>
+                                <button class="w-6 h-6 rounded-full bg-green-500 border border-gray-300" onclick="setQuickColor('#10b981')"></button>
+                                <button class="w-6 h-6 rounded-full bg-purple-500 border border-gray-300" onclick="setQuickColor('#8b5cf6')"></button>
+                                <button class="w-6 h-6 rounded-full bg-yellow-500 border border-gray-300" onclick="setQuickColor('#eab308')"></button>
+                                <button class="w-6 h-6 rounded-full bg-gray-500 border border-gray-300" onclick="setQuickColor('#6b7280')"></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Stroke -->
+                        <div>
+                            <label class="flex items-center space-x-2 mb-2">
+                                <input type="checkbox" id="enableStroke" class="rounded">
+                                <span class="text-sm font-medium text-gray-700">Text Outline</span>
+                            </label>
+                            <div class="flex space-x-2">
+                                <input type="color" id="strokeColor" value="#ffffff" class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                                <input type="range" id="strokeWidth" min="0" max="10" value="2" class="flex-1">
+                                <span class="text-sm text-gray-500 self-center" id="strokeWidthValue">2px</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Text Style Buttons -->
+                        <div class="grid grid-cols-4 gap-2">
+                            <button id="boldBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-bold text-sm">
+                                B
+                            </button>
+                            <button id="italicBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors italic text-sm">
+                                I
+                            </button>
+                            <button id="underlineBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors underline text-sm">
+                                U
+                            </button>
+                            <button id="shadowBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                <i class="fas fa-shadow"></i>
+                            </button>
+                        </div>
+
+                        <!-- Text Alignment -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alignment</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button id="alignLeftBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                    <i class="fas fa-align-left"></i>
+                                </button>
+                                <button id="alignCenterBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                    <i class="fas fa-align-center"></i>
+                                </button>
+                                <button id="alignRightBtn" class="py-2 px-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                    <i class="fas fa-align-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects & Filters -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-magic text-gray-600 mr-2"></i>
+                        Effects
+                    </h3>
+                    <div class="space-y-3">
+                        <button id="addShadowBtn" class="w-full py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                            <i class="fas fa-shadow mr-2"></i>
+                            Add Drop Shadow
+                        </button>
+                        <button id="addGlowBtn" class="w-full py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                            <i class="fas fa-sun mr-2"></i>
+                            Add Glow Effect
+                        </button>
+                        <button id="duplicateBtn" class="w-full py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                            <i class="fas fa-copy mr-2"></i>
+                            Duplicate Selected
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bolt text-gray-600 mr-2"></i>
+                        Quick Actions
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="clearBtn" class="py-2 px-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm">
+                            <i class="fas fa-trash mr-1"></i>
+                            Clear All
+                        </button>
+                        <button id="centerBtn" class="py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            <i class="fas fa-crosshairs mr-1"></i>
+                            Center
+                        </button>
+                        <button id="undoBtn" class="py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            <i class="fas fa-undo mr-1"></i>
+                            Undo
+                        </button>
+                        <button id="redoBtn" class="py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            <i class="fas fa-redo mr-1"></i>
+                            Redo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Layers Panel -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-layer-group text-gray-600 mr-2"></i>
+                        Layers
+                    </h3>
+                    <div id="layersPanel" class="space-y-2 max-h-48 overflow-y-auto">
+                        <!-- Layers will be dynamically added here -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="flex-1 flex flex-col">
+            <div class="bg-gray-100 p-6 flex-1 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <canvas id="fabricCanvas" width="800" height="600" class="border border-gray-300 rounded"></canvas>
+                </div>
+            </div>
+            
+            <!-- Bottom Toolbar -->
+            <div class="bg-white border-t border-gray-200 p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button id="zoomInBtn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button id="zoomOutBtn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button id="fitToScreenBtn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="text-sm text-gray-500">
+                    Use mouse to select, drag, and resize elements. Double-click text to edit.
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500" id="canvasInfo">800 x 600</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Fabric.js canvas
+        const canvas = new fabric.Canvas('fabricCanvas', {
+            backgroundColor: '#ffffff',
+            selection: true,
+            preserveObjectStacking: true
+        });
+
+        let layerCounter = 0;
+        let canvasHistory = [];
+        let historyStep = 0;
+
+        // Save canvas state for undo/redo
+        function saveCanvasState() {
+            if (historyStep < canvasHistory.length - 1) {
+                canvasHistory = canvasHistory.slice(0, historyStep + 1);
+            }
+            canvasHistory.push(JSON.stringify(canvas.toJSON()));
+            historyStep++;
+            
+            if (canvasHistory.length > 50) {
+                canvasHistory = canvasHistory.slice(-50);
+                historyStep = canvasHistory.length - 1;
+            }
+        }
+
+        // Quick color setter
+        function setQuickColor(color) {
+            document.getElementById('textColor').value = color;
+            document.getElementById('textColorHex').value = color;
+            
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fill', color);
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        }
+
+        // Template functions
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const template = this.dataset.template;
+                applyTemplate(template);
+            });
+        });
+
+        function applyTemplate(template) {
+            const templates = {
+                quote: {
+                    text: '"Your inspirational quote here"',
+                    fontSize: 48,
+                    fontFamily: 'Georgia',
+                    fill: '#2c3e50',
+                    textAlign: 'center'
+                },
+                social: {
+                    text: 'Follow @username',
+                    fontSize: 36,
+                    fontFamily: 'Arial',
+                    fill: '#1da1f2',
+                    textAlign: 'left'
+                },
+                title: {
+                    text: 'MAIN TITLE',
+                    fontSize: 64,
+                    fontFamily: 'Impact',
+                    fill: '#000000',
+                    textAlign: 'center'
+                },
+                minimal: {
+                    text: 'simple.',
+                    fontSize: 32,
+                    fontFamily: 'Helvetica',
+                    fill: '#666666',
+                    textAlign: 'left'
+                }
+            };
+
+            const config = templates[template];
+            if (config) {
+                document.getElementById('textInput').value = config.text;
+                document.getElementById('fontSize').value = config.fontSize;
+                document.getElementById('fontSizeValue').textContent = config.fontSize;
+                document.getElementById('fontFamily').value = config.fontFamily;
+                setQuickColor(config.fill);
+                
+                addTextToCanvas(config);
+            }
+        }
+
+        // Enhanced add text function
+        function addTextToCanvas(config = null) {
+            const textInput = document.getElementById('textInput').value;
+            if (textInput.trim()) {
+                const textConfig = config || {
+                    fontSize: parseInt(document.getElementById('fontSize').value),
+                    fontFamily: document.getElementById('fontFamily').value,
+                    fill: document.getElementById('textColor').value,
+                };
+
+                const text = new fabric.IText(textInput, {
+                    left: canvas.getWidth() / 2,
+                    top: canvas.getHeight() / 2,
+                    originX: 'center',
+                    originY: 'center',
+                    ...textConfig,
+                    stroke: document.getElementById('enableStroke').checked ? document.getElementById('strokeColor').value : '',
+                    strokeWidth: document.getElementById('enableStroke').checked ? parseInt(document.getElementById('strokeWidth').value) : 0
+                });
+                
+                canvas.add(text);
+                canvas.setActiveObject(text);
+                canvas.renderAll();
+                
+                document.getElementById('textInput').value = '';
+                updateLayersPanel();
+                saveCanvasState();
+            }
+        }
+
+        // Add heading function
+        document.getElementById('addHeadingBtn').addEventListener('click', function() {
+            const textInput = document.getElementById('textInput').value || 'Heading';
+            const text = new fabric.IText(textInput, {
+                left: canvas.getWidth() / 2,
+                top: canvas.getHeight() / 4,
+                originX: 'center',
+                originY: 'center',
+                fontSize: 64,
+                fontFamily: 'Impact',
+                fill: '#000000',
+                fontWeight: 'bold'
+            });
+            
+            canvas.add(text);
+            canvas.setActiveObject(text);
+            canvas.renderAll();
+            
+            document.getElementById('textInput').value = '';
+            updateLayersPanel();
+            saveCanvasState();
+        });
+
+        // Generate gradient background
+        document.getElementById('generateBgBtn').addEventListener('click', function() {
+            const gradients = [
+                ['#667eea', '#764ba2'],
+                ['#f093fb', '#f5576c'],
+                ['#4facfe', '#00f2fe'],
+                ['#43e97b', '#38f9d7'],
+                ['#fa709a', '#fee140'],
+                ['#a8edea', '#fed6e3'],
+                ['#ff9a9e', '#fecfef'],
+                ['#ffecd2', '#fcb69f']
+            ];
+            
+            const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+            const gradient = new fabric.Gradient({
+                type: 'linear',
+                coords: { x1: 0, y1: 0, x2: canvas.width, y2: canvas.height },
+                colorStops: [
+                    { offset: 0, color: randomGradient[0] },
+                    { offset: 1, color: randomGradient[1] }
+                ]
+            });
+            
+            canvas.setBackgroundColor(gradient, canvas.renderAll.bind(canvas));
+            saveCanvasState();
+        });
+
+        // Stroke width display
+        document.getElementById('strokeWidth').addEventListener('input', function() {
+            document.getElementById('strokeWidthValue').textContent = this.value + 'px';
+            updateStroke();
+        });
+
+        // Alignment functions
+        document.getElementById('alignLeftBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('textAlign', 'left');
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        document.getElementById('alignCenterBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('textAlign', 'center');
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        document.getElementById('alignRightBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('textAlign', 'right');
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Shadow effects
+        document.getElementById('addShadowBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                activeObject.set('shadow', {
+                    color: 'rgba(0,0,0,0.3)',
+                    blur: 5,
+                    offsetX: 3,
+                    offsetY: 3
+                });
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Glow effects
+        document.getElementById('addGlowBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                activeObject.set('shadow', {
+                    color: activeObject.fill || '#000000',
+                    blur: 20,
+                    offsetX: 0,
+                    offsetY: 0
+                });
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Duplicate function
+        document.getElementById('duplicateBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                activeObject.clone(function(cloned) {
+                    cloned.set({
+                        left: cloned.left + 20,
+                        top: cloned.top + 20
+                    });
+                    canvas.add(cloned);
+                    canvas.setActiveObject(cloned);
+                    canvas.renderAll();
+                    updateLayersPanel();
+                    saveCanvasState();
+                });
+            }
+        });
+
+        // Undo/Redo functions
+        document.getElementById('undoBtn').addEventListener('click', function() {
+            if (historyStep > 0) {
+                historyStep--;
+                canvas.loadFromJSON(canvasHistory[historyStep], canvas.renderAll.bind(canvas));
+                updateLayersPanel();
+            }
+        });
+
+        document.getElementById('redoBtn').addEventListener('click', function() {
+            if (historyStep < canvasHistory.length - 1) {
+                historyStep++;
+                canvas.loadFromJSON(canvasHistory[historyStep], canvas.renderAll.bind(canvas));
+                updateLayersPanel();
+            }
+        });
+
+        // Image upload functionality
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(f) {
+                    loadBackgroundImage(f.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('loadImageBtn').addEventListener('click', function() {
+            const url = document.getElementById('imageUrl').value;
+            if (url) {
+                loadBackgroundImage(url);
+            }
+        });
+
+        function loadBackgroundImage(url) {
+            // Use the image proxy to avoid CORS issues
+            let imageUrl = url;
+            
+            // If it's an external URL, use the proxy
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                imageUrl = `/proxy-image?url=${encodeURIComponent(url)}`;
+            }
+            
+            fabric.Image.fromURL(imageUrl, function(img) {
+                if (!img) {
+                    showNotification('Error', 'Failed to load the image. Please check the URL.', 'error');
+                    return;
+                }
+                
+                // Scale image to fit canvas while maintaining aspect ratio
+                const canvasWidth = canvas.getWidth();
+                const canvasHeight = canvas.getHeight();
+                const imgAspectRatio = img.width / img.height;
+                const canvasAspectRatio = canvasWidth / canvasHeight;
+                
+                let scaleFactor;
+                if (imgAspectRatio > canvasAspectRatio) {
+                    scaleFactor = canvasWidth / img.width;
+                } else {
+                    scaleFactor = canvasHeight / img.height;
+                }
+                
+                img.scale(scaleFactor);
+                img.set({
+                    left: (canvasWidth - img.width * scaleFactor) / 2,
+                    top: (canvasHeight - img.height * scaleFactor) / 2,
+                    selectable: true
+                });
+                
+                canvas.add(img);
+                canvas.sendToBack(img);
+                canvas.renderAll();
+                
+                updateLayersPanel();
+                saveCanvasState();
+            });
+        }
+
+        // Add text functionality
+        document.getElementById('addTextBtn').addEventListener('click', function() {
+            addTextToCanvas();
+        });
+
+        // Font size slider
+        document.getElementById('fontSize').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('fontSizeValue').textContent = value;
+            
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fontSize', parseInt(value));
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Text color
+        document.getElementById('textColor').addEventListener('change', function() {
+            const color = this.value;
+            document.getElementById('textColorHex').value = color;
+            
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fill', color);
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        document.getElementById('textColorHex').addEventListener('change', function() {
+            const color = this.value;
+            document.getElementById('textColor').value = color;
+            
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fill', color);
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Font family
+        document.getElementById('fontFamily').addEventListener('change', function() {
+            const fontFamily = this.value;
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                activeObject.set('fontFamily', fontFamily);
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Stroke functionality
+        document.getElementById('enableStroke').addEventListener('change', function() {
+            updateStroke();
+        });
+
+        document.getElementById('strokeColor').addEventListener('change', function() {
+            updateStroke();
+        });
+
+        function updateStroke() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                const enabled = document.getElementById('enableStroke').checked;
+                if (enabled) {
+                    activeObject.set({
+                        stroke: document.getElementById('strokeColor').value,
+                        strokeWidth: parseInt(document.getElementById('strokeWidth').value)
+                    });
+                } else {
+                    activeObject.set({
+                        stroke: '',
+                        strokeWidth: 0
+                    });
+                }
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        }
+
+        // Style buttons
+        document.getElementById('boldBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                const isBold = activeObject.fontWeight === 'bold';
+                activeObject.set('fontWeight', isBold ? 'normal' : 'bold');
+                canvas.renderAll();
+                this.classList.toggle('bg-gray-200', !isBold);
+                saveCanvasState();
+            }
+        });
+
+        document.getElementById('italicBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                const isItalic = activeObject.fontStyle === 'italic';
+                activeObject.set('fontStyle', isItalic ? 'normal' : 'italic');
+                canvas.renderAll();
+                this.classList.toggle('bg-gray-200', !isItalic);
+                saveCanvasState();
+            }
+        });
+
+        document.getElementById('underlineBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'i-text') {
+                const isUnderlined = activeObject.underline;
+                activeObject.set('underline', !isUnderlined);
+                canvas.renderAll();
+                this.classList.toggle('bg-gray-200', !isUnderlined);
+                saveCanvasState();
+            }
+        });
+
+        // Clear canvas
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            showConfirmModal(
+                'Clear Canvas',
+                'Are you sure you want to clear the entire canvas? This action cannot be undone.',
+                function() {
+                    // On confirm
+                    canvas.clear();
+                    canvas.backgroundColor = '#ffffff';
+                    updateLayersPanel();
+                    saveCanvasState();
+                },
+                function() {
+                    // On cancel - nothing to do
+                }
+            );
+        });
+
+        // Center object
+        document.getElementById('centerBtn').addEventListener('click', function() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                activeObject.center();
+                canvas.renderAll();
+                saveCanvasState();
+            }
+        });
+
+        // Download functionality
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // Check if canvas has any objects
+                if (canvas.getObjects().length === 0) {
+                    // Show a notification that there's nothing to download
+                    showNotification('Canvas is empty', 'Add some text or images before downloading.', 'warning');
+                    return;
+                }
+
+                // Try to generate the image
+                try {
+                    const dataURL = canvas.toDataURL({
+                        format: 'png',
+                        quality: 1.0,
+                        multiplier: 2
+                    });
+                    
+                    // Check if dataURL is valid
+                    if (!dataURL || dataURL === 'data:,') {
+                        throw new Error('Failed to generate image data');
+                    }
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = `textoverlay-creation-${Date.now()}.png`;
+                    link.href = dataURL;
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success notification
+                    showNotification('Success!', 'Your creation has been downloaded.', 'success');
+                    
+                } catch (corsError) {
+                    if (corsError.name === 'SecurityError' || corsError.message.includes('tainted')) {
+                        // CORS/Tainted canvas error - offer alternative
+                        showConfirmModal(
+                            'Download Issue',
+                            'The canvas contains external images that prevent direct download due to browser security. Would you like to try an alternative method?',
+                            function() {
+                                // Alternative: Open canvas content in new window for manual save
+                                try {
+                                    const canvas_elem = document.getElementById('fabricCanvas');
+                                    const newWindow = window.open('', '_blank');
+                                    newWindow.document.write(`
+                                        <html>
+                                            <head><title>TextOverlay Creation</title></head>
+                                            <body style="margin:0; padding:20px; text-align:center; background:#f5f5f5;">
+                                                <h3>Right-click the image below and select "Save image as..."</h3>
+                                                <div style="background:white; display:inline-block; padding:20px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                                                    ${canvas_elem.outerHTML}
+                                                </div>
+                                            </body>
+                                        </html>
+                                    `);
+                                    newWindow.document.close();
+                                    showNotification('Alternative Download', 'A new window opened. Right-click the image and save it manually.', 'info');
+                                } catch (altError) {
+                                    showNotification('Download Failed', 'Unable to download due to browser security restrictions. Try using local images instead of external URLs.', 'error');
+                                }
+                            }
+                        );
+                    } else {
+                        throw corsError; // Re-throw if it's not a CORS issue
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                showNotification('Download Failed', 'There was an error downloading your creation. Please try again.', 'error');
+            }
+        });
+
+        // Zoom functionality
+        document.getElementById('zoomInBtn').addEventListener('click', function() {
+            canvas.setZoom(canvas.getZoom() * 1.1);
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', function() {
+            canvas.setZoom(canvas.getZoom() / 1.1);
+        });
+
+        document.getElementById('fitToScreenBtn').addEventListener('click', function() {
+            canvas.setZoom(1);
+            canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+            canvas.renderAll();
+        });
+
+        // Update object properties when selected
+        canvas.on('selection:created', function(e) {
+            updateControlsFromObject(e.target);
+        });
+
+        canvas.on('selection:updated', function(e) {
+            updateControlsFromObject(e.target);
+        });
+
+        function updateControlsFromObject(obj) {
+            if (obj && obj.type === 'i-text') {
+                document.getElementById('fontFamily').value = obj.fontFamily || 'Arial';
+                document.getElementById('fontSize').value = obj.fontSize || 36;
+                document.getElementById('fontSizeValue').textContent = obj.fontSize || 36;
+                document.getElementById('textColor').value = obj.fill || '#000000';
+                document.getElementById('textColorHex').value = obj.fill || '#000000';
+                
+                // Update style buttons
+                document.getElementById('boldBtn').classList.toggle('bg-gray-200', obj.fontWeight === 'bold');
+                document.getElementById('italicBtn').classList.toggle('bg-gray-200', obj.fontStyle === 'italic');
+                document.getElementById('underlineBtn').classList.toggle('bg-gray-200', obj.underline === true);
+            }
+        }
+
+        // Layers panel functionality
+        function updateLayersPanel() {
+            const layersPanel = document.getElementById('layersPanel');
+            layersPanel.innerHTML = '';
+            
+            const objects = canvas.getObjects();
+            objects.forEach((obj, index) => {
+                const layerDiv = document.createElement('div');
+                layerDiv.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer';
+                
+                let layerName = 'Layer ' + (index + 1);
+                if (obj.type === 'i-text') {
+                    layerName = obj.text.substring(0, 20) + (obj.text.length > 20 ? '...' : '');
+                } else if (obj.type === 'image') {
+                    layerName = 'Image';
+                }
+                
+                layerDiv.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <i class="fas ${obj.type === 'i-text' ? 'fa-font' : 'fa-image'} text-gray-500"></i>
+                        <span class="text-sm text-gray-700">${layerName}</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 text-sm" onclick="removeLayer(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                layerDiv.addEventListener('click', function(e) {
+                    if (!e.target.closest('button')) {
+                        canvas.setActiveObject(obj);
+                        canvas.renderAll();
+                    }
+                });
+                
+                layersPanel.appendChild(layerDiv);
+            });
+        }
+
+        function removeLayer(index) {
+            const objects = canvas.getObjects();
+            if (objects[index]) {
+                canvas.remove(objects[index]);
+                updateLayersPanel();
+                saveCanvasState();
+            }
+        }
+
+        // Update layers panel when objects are modified
+        canvas.on('object:added', function() {
+            updateLayersPanel();
+            saveCanvasState();
+        });
+        
+        canvas.on('object:removed', function() {
+            updateLayersPanel();
+        });
+
+        // Initialize canvas state
+        saveCanvasState();
+
+        // Modern Confirmation Modal System
+        function showConfirmModal(title, message, onConfirm, onCancel) {
+            // Create modal backdrop
+            const modalBackdrop = document.createElement('div');
+            modalBackdrop.id = 'confirmModal';
+            modalBackdrop.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 transition-opacity duration-200';
+            
+            // Create modal content
+            modalBackdrop.innerHTML = `
+                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-200">
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">${title}</h3>
+                            <p class="text-sm text-gray-500 mb-6">${message}</p>
+                        </div>
+                        <div class="flex gap-3 justify-center">
+                            <button id="confirmBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                Yes, Clear
+                            </button>
+                            <button id="cancelBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalBackdrop);
+            
+            // Animate in
+            setTimeout(() => {
+                modalBackdrop.classList.remove('opacity-0');
+                modalBackdrop.querySelector('.bg-white').classList.remove('scale-95');
+                modalBackdrop.querySelector('.bg-white').classList.add('scale-100');
+            }, 10);
+            
+            // Add event listeners
+            const confirmBtn = modalBackdrop.querySelector('#confirmBtn');
+            const cancelBtn = modalBackdrop.querySelector('#cancelBtn');
+            
+            function closeModal() {
+                modalBackdrop.classList.add('opacity-0');
+                modalBackdrop.querySelector('.bg-white').classList.add('scale-95');
+                modalBackdrop.querySelector('.bg-white').classList.remove('scale-100');
+                
+                setTimeout(() => {
+                    if (modalBackdrop.parentNode) {
+                        modalBackdrop.parentNode.removeChild(modalBackdrop);
+                    }
+                }, 200);
+            }
+            
+            confirmBtn.addEventListener('click', () => {
+                onConfirm();
+                closeModal();
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                if (onCancel) onCancel();
+                closeModal();
+            });
+            
+            // Close on backdrop click
+            modalBackdrop.addEventListener('click', (e) => {
+                if (e.target === modalBackdrop) {
+                    if (onCancel) onCancel();
+                    closeModal();
+                }
+            });
+            
+            // Close on Escape key
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    if (onCancel) onCancel();
+                    closeModal();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        // Toast Notification System
+        function showNotification(title, message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 max-w-sm`;
+            
+            toast.innerHTML = `
+                <div class="flex items-start">
+                    <i class="${icons[type]} text-lg mr-3 mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="font-medium">${title}</h4>
+                        <p class="text-sm opacity-90 mt-1">${message}</p>
+                    </div>
+                    <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+                toast.classList.add('translate-x-0');
+            }, 10);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

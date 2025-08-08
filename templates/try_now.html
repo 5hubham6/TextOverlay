@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try Now - TextOverlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .shiny-black-gradient {
+            background: linear-gradient(145deg, #1f2937 0%, #374151 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .shiny-gray-light {
+            background: linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #374151 0%, #111827 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .professional-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -8px, 0);
+            }
+            70% {
+                transform: translate3d(0, -4px, 0);
+            }
+            90% {
+                transform: translate3d(0, -2px, 0);
+            }
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-outfit">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-full mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.location.href='/'" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </button>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 shiny-black-gradient rounded-lg flex items-center justify-center border border-gray-300">
+                            <i class="fas fa-rocket text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold gradient-text">Try Now</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/create" class="shiny-gray-light text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all text-sm border border-gray-400">
+                        <i class="fas fa-edit mr-1"></i>
+                        Quick Editor
+                    </a>
+                    <a href="/canvas_creator" class="shiny-black-gradient text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all text-sm border border-gray-300">
+                        <i class="fas fa-palette mr-1"></i>
+                        Canvas Editor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Welcome Section -->
+        <div class="text-center mb-12">
+            <div class="inline-block p-3 shiny-black-gradient rounded-full mb-4 floating border border-gray-300">
+                <i class="fas fa-magic text-white text-2xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold gradient-text mb-4">Try Our Text Overlay Editor</h1>
+            <p class="text-xl text-gray-600 mb-8">Experience the power of our editor with pre-loaded samples and interactive demos</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Panel - Demo Options -->
+            <div class="space-y-6">
+                <!-- Live Demo Card -->
+                <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 shiny-gray-light rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-400">
+                            <i class="fas fa-play text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold gradient-text mb-2"><i class="fas fa-film mr-2 text-gray-600"></i>Interactive Live Demo</h3>
+                        <p class="text-gray-600">Watch a step-by-step guided tutorial showing how to create amazing text overlays</p>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="w-8 h-8 shiny-gray-light text-white rounded-full flex items-center justify-center font-bold text-sm border border-gray-400">1</div>
+                            <span class="text-gray-700">Choose your image source</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="w-8 h-8 shiny-gray-light text-white rounded-full flex items-center justify-center font-bold text-sm border border-gray-400">2</div>
+                            <span class="text-gray-700">Add and style your text</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="w-8 h-8 shiny-gray-light text-white rounded-full flex items-center justify-center font-bold text-sm border border-gray-400">3</div>
+                            <span class="text-gray-700">Position and create your image</span>
+                        </div>
+                    </div>
+                    
+                    <button id="start-demo" class="w-full shiny-black-gradient text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition-all border border-gray-300">
+                        <i class="fas fa-play mr-2"></i>
+                        Start Interactive Demo
+                    </button>
+                </div>
+                
+                <!-- Try Samples Card -->
+                <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 shiny-gray-light rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-400">
+                            <i class="fas fa-images text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold gradient-text mb-2"><i class="fas fa-sparkles mr-2 text-gray-600"></i>Try Sample Templates</h3>
+                        <p class="text-gray-600">Jump right in with pre-made templates for quick results</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div class="sample-option cursor-pointer p-4 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-400 transition-all border border-gray-200" data-sample="motivational">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 shiny-gray-light rounded-lg flex items-center justify-center border border-gray-400">
+                                    <i class="fas fa-mountain text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Motivational Quote</p>
+                                    <p class="text-sm text-gray-500">Inspirational message template</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sample-option cursor-pointer p-4 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-400 transition-all border border-gray-200" data-sample="funny">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 shiny-gray-light rounded-lg flex items-center justify-center border border-gray-400">
+                                    <i class="fas fa-laugh text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Funny Meme</p>
+                                    <p class="text-sm text-gray-500">Popular comedy template</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sample-option cursor-pointer p-4 bg-gray-50 rounded-lg border-2 border-transparent hover:border-gray-400 transition-all border border-gray-200" data-sample="announcement">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 shiny-gray-light rounded-lg flex items-center justify-center border border-gray-400">
+                                    <i class="fas fa-bullhorn text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Announcement</p>
+                                    <p class="text-sm text-gray-500">Professional event notice</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="try-samples" class="w-full shiny-black-gradient text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition-all border border-gray-300">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Try Sample Templates
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Preview/Demo Display -->
+            <div class="bg-white rounded-2xl professional-shadow border border-gray-200 p-8">
+                <div id="preview-area" class="h-full">
+                    <!-- Welcome State -->
+                    <div id="welcome-state" class="text-center h-full flex flex-col justify-center">
+                        <div class="mb-8">
+                            <div class="w-24 h-24 shiny-gray-light rounded-full flex items-center justify-center mx-auto mb-4 floating border border-gray-400">
+                                <i class="fas fa-image text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold gradient-text mb-2">Ready to Create?</h3>
+                            <p class="text-gray-600">Choose a demo option to get started</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-check text-green-500"></i>
+                                    <span>Live Preview</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-check text-green-500"></i>
+                                    <span>Drag & Drop</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-check text-green-500"></i>
+                                    <span>Multiple Fonts</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Demo Content will be dynamically loaded here -->
+                    <div id="demo-display" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Demo Modal -->
+    <div id="demo-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 shiny-gray-light">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white"><i class="fas fa-film mr-2"></i>Interactive Live Demo</h3>
+                        <p class="text-gray-200 mt-1">Learn how to create amazing text overlays in 3 easy steps</p>
+                    </div>
+                    <button id="close-demo" class="text-gray-200 hover:text-white text-xl border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div id="demo-content">
+                    <div class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-500 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Preparing your demo experience...</p>
+                    </div>
+                </div>
+                
+                <!-- Demo Controls -->
+                <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500" id="demo-progress">Step 1 of 3</span>
+                        <div class="flex space-x-1">
+                            <div class="w-3 h-3 rounded-full bg-gray-600" id="step-1"></div>
+                            <div class="w-3 h-3 rounded-full bg-gray-300" id="step-2"></div>
+                            <div class="w-3 h-3 rounded-full bg-gray-300" id="step-3"></div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="demo-prev" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-chevron-left mr-2"></i>Previous
+                        </button>
+                        <button id="demo-next" class="px-4 py-2 shiny-gray-light text-white rounded-lg hover:shadow-lg border border-gray-400">
+                            Next<i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                        <button id="demo-auto" class="px-4 py-2 shiny-black-gradient text-white rounded-lg hover:shadow-lg border border-gray-300">
+                            <i class="fas fa-play mr-2"></i>Auto Play
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const startDemoBtn = document.getElementById('start-demo');
+            const trySamplesBtn = document.getElementById('try-samples');
+            const demoModal = document.getElementById('demo-modal');
+            const closeDemoBtn = document.getElementById('close-demo');
+            const demoContent = document.getElementById('demo-content');
+            const demoProgress = document.getElementById('demo-progress');
+            const demoPrevBtn = document.getElementById('demo-prev');
+            const demoNextBtn = document.getElementById('demo-next');
+            const demoAutoBtn = document.getElementById('demo-auto');
+            const stepIndicators = [
+                document.getElementById('step-1'),
+                document.getElementById('step-2'),
+                document.getElementById('step-3')
+            ];
+            const sampleOptions = document.querySelectorAll('.sample-option');
+            
+            // Demo state
+            let currentDemoStep = 0;
+            let isAutoPlaying = false;
+            let autoPlayInterval = null;
+            
+            // Sample templates
+            const samples = {
+                motivational: {
+                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+                    text: 'SUCCESS IS NOT FINAL\nFAILURE IS NOT FATAL\nIT IS THE COURAGE TO CONTINUE\nTHAT COUNTS',
+                    color: 'white',
+                    size: '48',
+                    family: 'Impact',
+                    x: '50',
+                    y: '50'
+                },
+                funny: {
+                    image: 'https://images.unsplash.com/photo-1415604934674-561df9abf539?w=800&h=600&fit=crop',
+                    text: 'WHEN YOU FINALLY FIX\nTHE BUG THAT\'S BEEN\nBUGGING YOU ALL DAY',
+                    color: 'white',
+                    size: '36',
+                    family: 'Arial',
+                    x: '50',
+                    y: '20'
+                },
+                announcement: {
+                    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+                    text: 'IMPORTANT ANNOUNCEMENT\n\nEvent: Team Meeting\nDate: Tomorrow\nTime: 3:00 PM',
+                    color: 'white',
+                    size: '32',
+                    family: 'Arial',
+                    x: '50',
+                    y: '40'
+                }
+            };
+            
+            // Demo steps
+            const demoSteps = [
+                {
+                    title: "📸 Step 1: Choose Your Image",
+                    description: "Start by selecting an image URL or uploading a file",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 What we're doing:</h4>
+                                    <p class="text-gray-700">Loading a beautiful mountain landscape that will serve as our background image.</p>
+                                </div>
+                                
+                                <div class="bg-white border-2 border-yellow-300 rounded-lg p-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Image URL</label>
+                                    <div class="relative">
+                                        <input type="url" value="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-yellow-50 font-mono text-sm" readonly>
+                                        <div class="absolute right-3 top-3 text-green-500">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-2">✅ High-quality Unsplash image selected</p>
+                                </div>
+                                
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-lightbulb text-blue-500"></i>
+                                        <span class="font-semibold text-gray-800">Pro Tip:</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700">Use high-resolution images (800x600 or larger) for the best results!</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center">
+                                <div class="text-center">
+                                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" 
+                                         class="rounded-lg shadow-lg mb-4 max-w-full h-auto" alt="Mountain landscape">
+                                    <p class="text-gray-600 font-medium">Beautiful mountain landscape loaded!</p>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "✏️ Step 2: Add Your Text",
+                    description: "Enter your message and customize the styling",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 What we're doing:</h4>
+                                    <p class="text-gray-700">Adding inspirational text with perfect styling for maximum impact.</p>
+                                </div>
+                                
+                                <div class="bg-white border-2 border-blue-300 rounded-lg p-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Text Content</label>
+                                        <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-blue-50 font-mono" rows="4" readonly>SUCCESS IS NOT FINAL
+FAILURE IS NOT FATAL
+IT IS THE COURAGE TO CONTINUE
+THAT COUNTS</textarea>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Font</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-blue-50" disabled>
+                                                <option>Impact</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Size</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-blue-50" disabled>
+                                                <option>48px (Large)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Color</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-blue-50" disabled>
+                                                <option>White</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-magic text-green-500"></i>
+                                        <span class="font-semibold text-gray-800">Live Preview:</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700">Watch the text appear on your image in real-time!</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="relative inline-block">
+                                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" 
+                                             class="rounded-lg shadow-lg" alt="Mountain with text">
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <div class="text-white text-center font-bold text-lg leading-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                                                SUCCESS IS NOT FINAL<br>
+                                                FAILURE IS NOT FATAL<br>
+                                                IT IS THE COURAGE TO CONTINUE<br>
+                                                THAT COUNTS
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 font-medium mt-4">Live preview with your styled text!</p>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "🎯 Step 3: Position & Create",
+                    description: "Fine-tune the text position and generate your image",
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-800 mb-2">🎯 Final Step:</h4>
+                                    <p class="text-gray-700">Perfect positioning and create your masterpiece!</p>
+                                </div>
+                                
+                                <div class="bg-white border-2 border-green-300 rounded-lg p-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Text Position Controls</label>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs text-gray-600 mb-2">Horizontal (50%)</label>
+                                                <input type="range" min="0" max="100" value="50" class="w-full accent-green-600" disabled>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-600 mb-2">Vertical (50%)</label>
+                                                <input type="range" min="0" max="100" value="50" class="w-full accent-green-600" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pt-4 border-t border-gray-200">
+                                        <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-bold text-lg shadow-lg">
+                                            <i class="fas fa-magic mr-2"></i>
+                                            Create Your Image!
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                    <div class="flex items-center space-x-2 mb-3">
+                                        <i class="fas fa-star text-purple-500"></i>
+                                        <span class="font-semibold text-gray-800">Congratulations! 🎉</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-3">You've learned the complete process!</p>
+                                    <div class="text-sm text-gray-600 space-y-1">
+                                        <p>• ✅ Image selection</p>
+                                        <p>• ✅ Text styling</p>
+                                        <p>• ✅ Perfect positioning</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-6 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="relative inline-block">
+                                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" 
+                                             class="rounded-lg shadow-xl border-4 border-green-400" alt="Final result">
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <div class="text-white text-center font-bold text-lg leading-tight" style="text-shadow: 3px 3px 6px rgba(0,0,0,0.9);">
+                                                SUCCESS IS NOT FINAL<br>
+                                                FAILURE IS NOT FATAL<br>
+                                                <span class="text-yellow-300">IT IS THE COURAGE TO CONTINUE</span><br>
+                                                <span class="text-yellow-300">THAT COUNTS</span>
+                                            </div>
+                                        </div>
+                                        <div class="absolute -top-2 -right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                            <i class="fas fa-check mr-1"></i>Perfect!
+                                        </div>
+                                    </div>
+                                    <p class="text-green-600 font-bold mt-4">🎉 Your masterpiece is ready!</p>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            ];
+            
+            // Demo functions
+            function showDemoModal() {
+                demoModal.classList.remove('hidden');
+                currentDemoStep = 0;
+                showDemoStep(0);
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function hideDemoModal() {
+                demoModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                stopAutoPlay();
+            }
+            
+            function showDemoStep(stepIndex) {
+                currentDemoStep = stepIndex;
+                const step = demoSteps[stepIndex];
+                
+                demoContent.innerHTML = `
+                    <div class="mb-6">
+                        <h4 class="text-2xl font-bold text-gray-800 mb-2">${step.title}</h4>
+                        <p class="text-gray-600 text-lg">${step.description}</p>
+                    </div>
+                    ${step.content}
+                `;
+                
+                demoProgress.textContent = `Step ${stepIndex + 1} of ${demoSteps.length}`;
+                
+                stepIndicators.forEach((indicator, index) => {
+                    if (index <= stepIndex) {
+                        indicator.classList.remove('bg-gray-300');
+                        indicator.classList.add('bg-gray-600');
+                    } else {
+                        indicator.classList.remove('bg-gray-600');
+                        indicator.classList.add('bg-gray-300');
+                    }
+                });
+                
+                demoPrevBtn.disabled = stepIndex === 0;
+                demoNextBtn.innerHTML = stepIndex === demoSteps.length - 1 ? 
+                    'Start Creating!<i class="fas fa-rocket ml-2"></i>' : 
+                    'Next<i class="fas fa-chevron-right ml-2"></i>';
+            }
+            
+            function nextDemoStep() {
+                if (currentDemoStep < demoSteps.length - 1) {
+                    showDemoStep(currentDemoStep + 1);
+                } else {
+                    // Final step - redirect to editor
+                    window.location.href = '/create';
+                }
+            }
+            
+            function prevDemoStep() {
+                if (currentDemoStep > 0) {
+                    showDemoStep(currentDemoStep - 1);
+                }
+            }
+            
+            function startAutoPlay() {
+                if (isAutoPlaying) {
+                    stopAutoPlay();
+                    return;
+                }
+                
+                isAutoPlaying = true;
+                demoAutoBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pause';
+                demoAutoBtn.classList.remove('shiny-black-gradient');
+                demoAutoBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                
+                autoPlayInterval = setInterval(() => {
+                    if (currentDemoStep < demoSteps.length - 1) {
+                        nextDemoStep();
+                    } else {
+                        stopAutoPlay();
+                    }
+                }, 5000); // 5 seconds per step
+            }
+            
+            function stopAutoPlay() {
+                isAutoPlaying = false;
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                }
+                demoAutoBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Auto Play';
+                demoAutoBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                demoAutoBtn.classList.add('shiny-black-gradient');
+            }
+            
+            // Event Listeners
+            startDemoBtn.addEventListener('click', showDemoModal);
+            closeDemoBtn.addEventListener('click', hideDemoModal);
+            demoNextBtn.addEventListener('click', nextDemoStep);
+            demoPrevBtn.addEventListener('click', prevDemoStep);
+            demoAutoBtn.addEventListener('click', startAutoPlay);
+            
+            // Try samples functionality
+            trySamplesBtn.addEventListener('click', function() {
+                // Redirect to Quick Editor with sample mode
+                window.location.href = '/create#samples';
+            });
+            
+            // Sample option clicks
+            sampleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const sampleType = this.dataset.sample;
+                    const sample = samples[sampleType];
+                    
+                    // Visual feedback
+                    sampleOptions.forEach(opt => opt.classList.remove('border-purple-500', 'ring-2', 'ring-purple-200'));
+                    this.classList.add('border-purple-500', 'ring-2', 'ring-purple-200');
+                    
+                    // Store sample choice and redirect
+                    sessionStorage.setItem('selectedSample', sampleType);
+                    setTimeout(() => {
+                        window.location.href = '/create';
+                    }, 500);
+                });
+            });
+            
+            // Close modal on outside click
+            demoModal.addEventListener('click', function(e) {
+                if (e.target === demoModal) {
+                    hideDemoModal();
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (!demoModal.classList.contains('hidden')) {
+                    switch(e.key) {
+                        case 'Escape':
+                            hideDemoModal();
+                            break;
+                        case 'ArrowRight':
+                            nextDemoStep();
+                            break;
+                        case 'ArrowLeft':
+                            prevDemoStep();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            startAutoPlay();
+                            break;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

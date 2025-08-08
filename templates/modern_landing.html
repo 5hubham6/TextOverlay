@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextOverlay - Professional Text Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/framer-motion/11.0.8/framer-motion.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fade-in 0.8s ease-out',
+                        'slide-up': 'slide-up 0.8s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        'fade-in': {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        'slide-up': {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #374151 0%, #111827 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #374151 0%, #111827 100%);
+        }
+        .shiny-black-gradient {
+            background: linear-gradient(145deg, #1f2937 0%, #374151 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .shiny-gray-light {
+            background: linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .shiny-gray-dark {
+            background: linear-gradient(145deg, #374151 0%, #1f2937 50%, #111827 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hover-lift {
+            transition: all 0.4s ease;
+            animation: float-subtle 4s ease-in-out infinite;
+        }
+        .hover-lift:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation-play-state: paused;
+        }
+        .professional-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .professional-shadow:hover {
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        @keyframes float-subtle {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-8px) rotate(1deg); }
+            66% { transform: translateY(-4px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-outfit">
+    
+    <!-- Navigation -->
+    <nav class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto relative z-50">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 shiny-black-gradient rounded-lg flex items-center justify-center border border-gray-300">
+                <i class="fas fa-text-height text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold gradient-text">TextOverlay</h1>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Sign In
+            </button>
+            <button class="shiny-black-gradient text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all border border-gray-300">
+                Get Started
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="max-w-7xl mx-auto px-6 py-20">
+        <div class="text-center">
+            <!-- Floating Icon -->
+            <div class="mb-8">
+                <div class="w-24 h-24 mx-auto shiny-black-gradient rounded-2xl flex items-center justify-center animate-float border border-gray-300">
+                    <i class="fas fa-magic text-white text-3xl"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-6xl lg:text-7xl font-bold mb-6 animate-slide-up">
+                <span class="gradient-text">Simple Text</span><br>
+                <span class="text-gray-800">Image Editor</span>
+            </h1>
+            
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed animate-fade-in">
+                Add text to your images quickly and easily. 
+                Choose from three different editors based on your needs.
+            </p>
+            
+            <!-- Main Action Buttons -->
+            <div class="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-8 mb-20">
+                <!-- Live Demo -->
+                <div class="group cursor-pointer hover-lift bg-white rounded-2xl p-8 professional-shadow border border-gray-200 w-full lg:w-80">
+                    <div class="w-16 h-16 shiny-gray-light rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-400">
+                        <i class="fas fa-play text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Live Demo</h3>
+                    <p class="text-gray-600 mb-6">Try the editor with sample images</p>
+                    <button onclick="window.location.href='/meme_rand'" class="w-full shiny-gray-light text-white py-3 rounded-lg hover:shadow-lg transition-all border border-gray-400">
+                        Try Now
+                    </button>
+                </div>
+                
+                <!-- Normal Editor -->
+                <div class="group cursor-pointer hover-lift bg-white rounded-2xl p-8 professional-shadow border border-gray-200 w-full lg:w-80">
+                    <div class="w-16 h-16 shiny-black-gradient rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-300">
+                        <i class="fas fa-edit text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Quick Editor</h3>
+                    <p class="text-gray-600 mb-6">Simple text overlay tool</p>
+                    <button onclick="window.location.href='/create'" class="w-full shiny-black-gradient text-white py-3 rounded-lg hover:shadow-lg transition-all border border-gray-300">
+                        Start Creating
+                    </button>
+                </div>
+                
+                <!-- Full Creator -->
+                <div class="group cursor-pointer hover-lift bg-white rounded-2xl p-8 professional-shadow border border-gray-200 w-full lg:w-80 relative overflow-hidden">
+                    <div class="absolute top-4 right-4 shiny-gray-dark text-white text-xs px-3 py-1 rounded-full border border-gray-500">
+                        Advanced
+                    </div>
+                    <div class="w-16 h-16 shiny-gray-dark rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-500">
+                        <i class="fas fa-palette text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Canvas Editor</h3>
+                    <p class="text-gray-600 mb-6">Advanced editor with layers and effects</p>
+                    <button onclick="window.location.href='/canvas_creator'" class="w-full shiny-gray-dark text-white py-3 rounded-lg hover:shadow-lg transition-all border border-gray-500">
+                        Launch Editor
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="mt-20 text-center">
+            <div class="inline-flex items-center px-6 py-2 bg-white rounded-full border-2 border-gray-200 text-lg font-medium text-gray-700 mb-16">
+                Features
+            </div>
+            
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+                <!-- Feature 1 -->
+                <div class="group hover-lift bg-white rounded-xl p-6 professional-shadow border border-gray-100">
+                    <div class="w-14 h-14 shiny-black-gradient rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-300">
+                        <i class="fas fa-font text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Multiple Fonts</h3>
+                    <p class="text-gray-600">Choose from various fonts and styling options</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="group hover-lift bg-white rounded-xl p-6 professional-shadow border border-gray-100">
+                    <div class="w-14 h-14 shiny-gray-light rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-400">
+                        <i class="fas fa-layer-group text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Layer Support</h3>
+                    <p class="text-gray-600">Organize elements with layer management</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="group hover-lift bg-white rounded-xl p-6 professional-shadow border border-gray-100">
+                    <div class="w-14 h-14 shiny-gray-dark rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-500">
+                        <i class="fas fa-magic text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Simple Effects</h3>
+                    <p class="text-gray-600">Add shadows, outlines, and basic effects</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="group hover-lift bg-white rounded-xl p-6 professional-shadow border border-gray-100">
+                    <div class="w-14 h-14 shiny-black-gradient rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-gray-300">
+                        <i class="fas fa-download text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Easy Export</h3>
+                    <p class="text-gray-600">Download your creations in various formats</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-black opacity-30"></div>
+            <div class="relative z-10">
+                <h2 class="text-4xl font-bold mb-4">Ready to Get Started?</h2>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                    Start creating your text overlays today.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button onclick="window.location.href='/canvas_creator'" class="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-4 rounded-lg font-semibold transition-all">
+                        Start Editor
+                    </button>
+                    <button onclick="window.location.href='/create'" class="border-2 border-white text-white hover:bg-white hover:text-gray-900 text-lg px-8 py-4 rounded-lg font-semibold transition-all">
+                        Quick Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 py-12 bg-white/50">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 shiny-black-gradient rounded-lg flex items-center justify-center border border-gray-300">
+                    <i class="fas fa-text-height text-white text-sm"></i>
+                </div>
+                <h3 class="text-xl font-bold gradient-text">TextOverlay</h3>
+            </div>
+            <p class="text-gray-600">© 2025 TextOverlay. Simple text editing for everyone.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Add subtle animations on scroll
+        window.addEventListener('scroll', () => {
+            const elements = document.querySelectorAll('.hover-lift');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                if (isVisible) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

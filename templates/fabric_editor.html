@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextOverlay Pro - Fabric.js Editor</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/6.0.0/index.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Professional Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .canvas-container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .control-panel {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .layer-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .layer-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Layout -->
+    <div class="flex h-screen">
+        <!-- Left Sidebar - Controls -->
+        <div class="w-80 control-panel p-6 overflow-y-auto">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-white mb-2">
+                    <i class="fas fa-magic mr-2 text-blue-400"></i>
+                    TextOverlay Pro
+                </h1>
+                <p class="text-slate-400 text-sm">Fabric.js Canvas Engine</p>
+            </div>
+            
+            <!-- Image Upload Section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-image mr-2 text-pink-400"></i>
+                    Background Image
+                </h3>
+                
+                <div class="space-y-3">
+                    <input type="file" 
+                           id="imageUpload" 
+                           accept="image/*" 
+                           class="hidden"
+                           onchange="handleImageUpload(this)">
+                    
+                    <button onclick="document.getElementById('imageUpload').click()" 
+                            class="w-full btn-primary text-white px-4 py-3 rounded-lg font-medium">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload Image
+                    </button>
+                    
+                    <div class="relative">
+                        <input type="url" 
+                               id="imageUrl" 
+                               placeholder="Or paste image URL..." 
+                               class="w-full input-field px-4 py-3 rounded-lg">
+                        <button onclick="loadImageFromUrl()" 
+                                class="absolute right-2 top-2 btn-secondary text-white px-3 py-1.5 rounded text-sm">
+                            Load
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Controls -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-font mr-2 text-blue-400"></i>
+                    Add Text
+                </h3>
+                
+                <div class="space-y-3">
+                    <input type="text" 
+                           id="newText" 
+                           placeholder="Enter your text..." 
+                           class="w-full input-field px-4 py-3 rounded-lg">
+                    
+                    <button onclick="addNewText()" 
+                            class="w-full btn-primary text-white px-4 py-3 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Text Layer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Font Styling -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-palette mr-2 text-pink-400"></i>
+                    Text Styling
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Font Family -->
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-2">Font Family</label>
+                        <select id="fontFamily" 
+                                onchange="canvasEngine.changeFont(this.value)" 
+                                class="w-full input-field px-4 py-2 rounded-lg">
+                            <option value="Arial">Arial</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Poppins">Poppins</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Open Sans">Open Sans</option>
+                            <option value="Helvetica">Helvetica</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Impact">Impact</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Font Size -->
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-2">Font Size</label>
+                        <input type="range" 
+                               id="fontSize" 
+                               min="12" 
+                               max="200" 
+                               value="40" 
+                               onchange="canvasEngine.changeFontSize(this.value)"
+                               class="w-full">
+                        <div class="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>12px</span>
+                            <span id="fontSizeValue">40px</span>
+                            <span>200px</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Colors -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-2">Text Color</label>
+                            <input type="color" 
+                                   id="textColor" 
+                                   value="#ffffff" 
+                                   onchange="canvasEngine.changeTextColor(this.value)"
+                                   class="w-full h-10 rounded-lg cursor-pointer">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-2">Stroke Color</label>
+                            <input type="color" 
+                                   id="strokeColor" 
+                                   value="#000000" 
+                                   onchange="canvasEngine.changeStrokeColor(this.value)"
+                                   class="w-full h-10 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+                    
+                    <!-- Stroke Width -->
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-2">Stroke Width</label>
+                        <input type="range" 
+                               id="strokeWidth" 
+                               min="0" 
+                               max="20" 
+                               value="2" 
+                               onchange="canvasEngine.changeStrokeWidth(this.value)"
+                               class="w-full">
+                        <div class="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>0px</span>
+                            <span id="strokeWidthValue">2px</span>
+                            <span>20px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layer Controls -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-layers mr-2 text-blue-400"></i>
+                    Layer Controls
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="canvasEngine.moveLayerUp()" 
+                            class="btn-primary text-white px-3 py-2 rounded-lg text-sm">
+                        <i class="fas fa-arrow-up"></i> Up
+                    </button>
+                    
+                    <button onclick="canvasEngine.moveLayerDown()" 
+                            class="btn-primary text-white px-3 py-2 rounded-lg text-sm">
+                        <i class="fas fa-arrow-down"></i> Down
+                    </button>
+                    
+                    <button onclick="toggleLockSelected()" 
+                            class="btn-secondary text-white px-3 py-2 rounded-lg text-sm">
+                        <i class="fas fa-lock"></i> Lock
+                    </button>
+                    
+                    <button onclick="canvasEngine.deleteSelected()" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+                
+                <!-- Layer Panel -->
+                <div id="layerPanel" class="space-y-2 max-h-40 overflow-y-auto">
+                    <!-- Layers will be populated here -->
+                </div>
+            </div>
+            
+            <!-- History Controls -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-history mr-2 text-pink-400"></i>
+                    History
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="undoBtn" 
+                            onclick="canvasEngine.undo()" 
+                            class="btn-primary text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-undo"></i> Undo
+                    </button>
+                    
+                    <button id="redoBtn" 
+                            onclick="canvasEngine.redo()" 
+                            class="btn-primary text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-redo"></i> Redo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Export -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">
+                    <i class="fas fa-download mr-2 text-blue-400"></i>
+                    Export
+                </h3>
+                
+                <div class="space-y-2">
+                    <button onclick="canvasEngine.downloadImage('text-overlay', 'png')" 
+                            class="w-full btn-primary text-white px-4 py-3 rounded-lg font-medium">
+                        <i class="fas fa-download mr-2"></i>
+                        Download PNG
+                    </button>
+                    
+                    <button onclick="canvasEngine.downloadImage('text-overlay', 'jpeg')" 
+                            class="w-full btn-secondary text-white px-4 py-3 rounded-lg font-medium">
+                        <i class="fas fa-download mr-2"></i>
+                        Download JPEG
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Canvas Area -->
+        <div class="flex-1 p-6 flex items-center justify-center">
+            <div class="canvas-container p-6">
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/static/js/canvas-engine.js"></script>
+    
+    <script>
+        // Initialize app
+        let canvasEngine;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            canvasEngine = new CanvasEngine('canvas', {
+                width: 800,
+                height: 600
+            });
+            
+            // Update slider value displays
+            document.getElementById('fontSize').addEventListener('input', function() {
+                document.getElementById('fontSizeValue').textContent = this.value + 'px';
+            });
+            
+            document.getElementById('strokeWidth').addEventListener('input', function() {
+                document.getElementById('strokeWidthValue').textContent = this.value + 'px';
+            });
+            
+            console.log('🚀 TextOverlay Pro - Fabric.js Editor Ready!');
+        });
+        
+        // Handle image upload
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    canvasEngine.setBackgroundImage(e.target.result)
+                        .then(() => {
+                            console.log('✅ Image uploaded successfully');
+                        })
+                        .catch(error => {
+                            console.error('❌ Image upload failed:', error);
+                            alert('Failed to load image. Please try again.');
+                        });
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Load image from URL
+        function loadImageFromUrl() {
+            const url = document.getElementById('imageUrl').value.trim();
+            if (url) {
+                canvasEngine.setBackgroundImage(url)
+                    .then(() => {
+                        console.log('✅ Image loaded from URL');
+                        document.getElementById('imageUrl').value = '';
+                    })
+                    .catch(error => {
+                        console.error('❌ Failed to load image from URL:', error);
+                        alert('Failed to load image from URL. Please check the URL and try again.');
+                    });
+            }
+        }
+        
+        // Add new text
+        function addNewText() {
+            const text = document.getElementById('newText').value.trim();
+            if (text) {
+                canvasEngine.addTextLayer(text);
+                document.getElementById('newText').value = '';
+            } else {
+                alert('Please enter some text first!');
+            }
+        }
+        
+        // Toggle lock for selected object
+        function toggleLockSelected() {
+            const isLocked = canvasEngine.toggleLock();
+            const lockBtn = event.target;
+            if (isLocked) {
+                lockBtn.innerHTML = '<i class="fas fa-lock"></i> Locked';
+                lockBtn.classList.remove('btn-secondary');
+                lockBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            } else {
+                lockBtn.innerHTML = '<i class="fas fa-lock-open"></i> Lock';
+                lockBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                lockBtn.classList.add('btn-secondary');
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            canvasEngine.redo();
+                        } else {
+                            canvasEngine.undo();
+                        }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        canvasEngine.redo();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        canvasEngine.downloadImage('text-overlay', 'png');
+                        break;
+                }
+            }
+            
+            // Delete key
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    canvasEngine.deleteSelected();
+                }
+            }
+        });
+        
+        // Welcome message
+        setTimeout(() => {
+            console.log(`
+🎨 ========================================= 🎨
+   TEXTOVERLAY PRO - FABRIC.JS EDITOR
+🎨 ========================================= 🎨
+
+✨ Professional Features:
+   • Drag & Drop Text Layers
+   • Advanced Font Controls  
+   • Multi-Layer Management
+   • Undo/Redo System
+   • Professional Export Options
+
+🎯 Keyboard Shortcuts:
+   • Ctrl+Z: Undo
+   • Ctrl+Shift+Z: Redo
+   • Ctrl+S: Download PNG
+   • Delete: Remove Selected
+
+Ready to create something amazing! 🚀
+            `);
+        }, 1000);
+    </script>
+</body>
+</html>
