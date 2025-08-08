@@ -118,7 +118,7 @@
                     Create Your Design
                 </h2>
                 
-                <form action="{{url_for('meme_post')}}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form id="image-form" action="{{url_for('meme_post')}}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     <!-- Image Source -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-3">Image Source</label>
@@ -380,6 +380,7 @@
             // Info panels
             const infoPanels = document.querySelectorAll('.info-panel');
             
+            let currentImageUrl = ''; // Track current loaded image URL
             let currentImage = null;
             let ctx = null;
             let isDragging = false;
@@ -661,6 +662,7 @@ IT IS THE COURAGE TO CONTINUE</textarea>
             
             // Load image and create preview
             function loadImage(src) {
+                console.log('loadImage called with:', src);
                 if (!previewCanvas) return;
                 
                 previewLoading.style.display = 'flex';
@@ -670,12 +672,14 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                 let imageUrl = src;
                 if (src.startsWith('http://') || src.startsWith('https://')) {
                     imageUrl = `/proxy-image?url=${encodeURIComponent(src)}`;
+                    console.log('Using proxy URL:', imageUrl);
                 }
                 
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 
                 img.onload = function() {
+                    console.log('Image loaded successfully, dimensions:', img.width, 'x', img.height);
                     // Set canvas size
                     const maxWidth = 500;
                     const maxHeight = 400;
@@ -711,6 +715,7 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                 };
                 
                 img.onerror = function() {
+                    console.log('Image failed to load:', src);
                     previewLoading.style.display = 'none';
                     // Show error message
                     ctx.fillStyle = '#ef4444';
@@ -827,11 +832,25 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                     hideInfoPanels();
                     showPreview();
                     
+                    // Hide result panel when loading new image
+                    const resultPanel = document.getElementById('result-panel');
+                    if (resultPanel) {
+                        resultPanel.style.display = 'none';
+                    }
+                    
                     if (hasUrl) {
-                        loadImage(imageUrlField.value);
+                        // Only load if it's a different URL
+                        if (imageUrlField.value !== currentImageUrl) {
+                            currentImageUrl = imageUrlField.value;
+                            loadImage(imageUrlField.value);
+                        } else if (currentImage) {
+                            // Image already loaded, just render preview
+                            renderPreview();
+                        }
                     } else if (hasFile) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
+                            currentImageUrl = e.target.result;
                             loadImage(e.target.result);
                         };
                         reader.readAsDataURL(imageFileField.files[0]);
@@ -839,6 +858,12 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                 } else {
                     showInfoPanels();
                     hidePreview();
+                    
+                    // Hide result panel when no image
+                    const resultPanel = document.getElementById('result-panel');
+                    if (resultPanel) {
+                        resultPanel.style.display = 'none';
+                    }
                 }
             }
             
@@ -864,6 +889,11 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                 textX = Math.max(5, Math.min(95, textX));
                 textY = Math.max(10, Math.min(90, textY));
                 
+                // Update sliders to match drag position
+                positionX.value = Math.round(textX);
+                positionY.value = Math.round(textY);
+                updateSliderDisplay();
+                
                 renderPreview();
             });
             
@@ -877,6 +907,11 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                 // Keep within bounds
                 textX = Math.max(5, Math.min(95, textX));
                 textY = Math.max(10, Math.min(90, textY));
+                
+                // Update sliders to match drag position
+                positionX.value = Math.round(textX);
+                positionY.value = Math.round(textY);
+                updateSliderDisplay();
                 
                 renderPreview();
             });
@@ -999,6 +1034,7 @@ IT IS THE COURAGE TO CONTINUE</textarea>
             // Load Image button
             document.getElementById('loadImageBtn').addEventListener('click', function() {
                 const url = imageUrlField.value.trim();
+                console.log('Load button clicked, URL:', url);
                 if (url) {
                     checkForImage();
                 } else {
@@ -1054,6 +1090,16 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                     textX = 50;
                     textY = 50;
                     updateSliderDisplay();
+                    
+                    // Clear result panel
+                    const resultPanel = document.getElementById('result-panel');
+                    if (resultPanel) {
+                        resultPanel.style.display = 'none';
+                    }
+                    
+                    // Reset image state
+                    currentImageUrl = '';
+                    currentImage = null;
                 }, 100);
             });
             
@@ -1126,6 +1172,138 @@ IT IS THE COURAGE TO CONTINUE</textarea>
                             }, 300);
                         }, 3000);
                     }, 300);
+                }
+            }
+            
+            // AJAX Form Submission
+            const form = document.getElementById('image-form');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Update form fields with current position values
+                positionX.value = Math.round(textX);
+                positionY.value = Math.round(textY);
+                
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const formData = new FormData(form);
+                    
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            showResultPanel(result.image_path);
+                            showToast('Image created successfully!', 'success');
+                        } else {
+                            showToast(result.message || 'Error creating image', 'error');
+                        }
+                    } else {
+                        const errorResult = await response.json().catch(() => ({}));
+                        showToast(errorResult.message || 'Server error occurred', 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Network error occurred', 'error');
+                } finally {
+                    // Restore button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            function showResultPanel(imagePath) {
+                // Hide info panels
+                document.querySelectorAll('.info-panel').forEach(panel => {
+                    panel.style.display = 'none';
+                });
+                
+                // Create or show result panel
+                let resultPanel = document.getElementById('result-panel');
+                if (!resultPanel) {
+                    resultPanel = document.createElement('div');
+                    resultPanel.id = 'result-panel';
+                    resultPanel.className = 'bg-white rounded-2xl professional-shadow border border-gray-200 p-6';
+                    document.getElementById('info-panels').appendChild(resultPanel);
+                }
+                
+                resultPanel.innerHTML = `
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        Your Image is Ready!
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="text-center">
+                            <img src="${imagePath}" alt="Generated Image" class="max-w-full h-auto rounded-lg shadow-lg border border-gray-200">
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-download text-blue-500 mr-2"></i>
+                                Download Options
+                            </h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="/download/${imagePath.startsWith('/static/') ? imagePath.substring(8) : imagePath}?format=original" 
+                                   class="flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                                    <i class="fas fa-file-image mr-2"></i>
+                                    Original
+                                </a>
+                                <a href="/download/${imagePath.startsWith('/static/') ? imagePath.substring(8) : imagePath}?format=png" 
+                                   class="flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                                    <i class="fas fa-file-image mr-2"></i>
+                                    PNG
+                                </a>
+                                <a href="/download/${imagePath.startsWith('/static/') ? imagePath.substring(8) : imagePath}?format=webp" 
+                                   class="flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                                    <i class="fas fa-file-image mr-2"></i>
+                                    WebP
+                                </a>
+                                <a href="/download/${imagePath.startsWith('/static/') ? imagePath.substring(8) : imagePath}?format=pdf" 
+                                   class="flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                                    <i class="fas fa-file-pdf mr-2"></i>
+                                    PDF
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4 flex justify-center">
+                            <button onclick="resetAndCreate()" class="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Create Another Image
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                resultPanel.style.display = 'block';
+                
+                // Scroll to result
+                resultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            function resetAndCreate() {
+                // Show info panels
+                document.querySelectorAll('.info-panel').forEach(panel => {
+                    panel.style.display = 'block';
+                });
+                
+                // Hide result panel
+                const resultPanel = document.getElementById('result-panel');
+                if (resultPanel) {
+                    resultPanel.style.display = 'none';
                 }
             }
         });

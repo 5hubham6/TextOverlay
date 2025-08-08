@@ -4,6 +4,7 @@
 import random
 import os
 import requests
+import json
 from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
@@ -26,16 +27,41 @@ DATABASE_CONFIG = {
     'port': os.environ.get('DB_PORT', '5432')
 }
 
-# Simple in-memory user store for now (will connect to PostgreSQL later)
-users_db = {
-    'demo': {
-        'id': str(uuid.uuid4()),
-        'username': 'demo',
-        'email': 'demo@textoverlay.com',
-        'password_hash': generate_password_hash('demo123'),
-        'created_at': datetime.now()
+# File-based user storage
+USERS_FILE = 'users.json'
+
+def load_users():
+    """Load users from JSON file"""
+    if os.path.exists(USERS_FILE):
+        try:
+            with open(USERS_FILE, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            pass
+    
+    # Create default demo user if file doesn't exist or is corrupted
+    default_users = {
+        'demo': {
+            'id': str(uuid.uuid4()),
+            'username': 'demo',
+            'email': 'demo@textoverlay.com',
+            'password_hash': generate_password_hash('demo123'),
+            'created_at': datetime.now().isoformat()
+        }
     }
-}
+    save_users(default_users)
+    return default_users
+
+def save_users(users_data):
+    """Save users to JSON file"""
+    try:
+        with open(USERS_FILE, 'w') as f:
+            json.dump(users_data, f, indent=2, default=str)
+    except Exception as e:
+        print(f"Error saving users: {e}")
+
+# Load users from file
+users_db = load_users()
 
 # Initialize image processor 
 overlay = ImageProcessor('./static')
@@ -72,9 +98,13 @@ def create_user(username, email, password):
         'username': username,
         'email': email,
         'password_hash': generate_password_hash(password),
-        'created_at': datetime.now()
+        'created_at': datetime.now().isoformat()
     }
     users_db[username] = user
+    
+    # Save to file
+    save_users(users_db)
+    
     return user
 
 
@@ -164,9 +194,15 @@ def proxy_image():
         return 'URL parameter required', 400
     
     try:
-        # Add user agent to avoid blocking
+        # Enhanced headers to avoid blocking (same as in meme_post)
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Referer': 'https://www.google.com/'
         }
         
         print(f"Fetching image from: {image_url}")  # Debug log
@@ -254,8 +290,19 @@ def meme_post():
             if not image_url:
                 return render_template('error.html', error='Image URL is required when using URL source')
             
+            # Set better headers to avoid 403 errors
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Referer': 'https://www.google.com/'
+            }
+            
             # Download the image
-            response = requests.get(image_url, timeout=10)
+            response = requests.get(image_url, timeout=15, headers=headers)
             response.raise_for_status()
             
             # Get file extension from URL
@@ -283,17 +330,130 @@ def meme_post():
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
         
-        return render_template('meme.html', path=path)
+        # Convert file system path to web URL
+        web_path = path.replace('./static/', '/static/').replace('.\\static\\', '/static/').replace('\\', '/')
+        if not web_path.startswith('/static/'):
+            # If it's a relative path, ensure it starts with /static/
+            filename = os.path.basename(path)
+            web_path = f'/static/{filename}'
+        
+        # Check if this is an AJAX request (for staying on the same page)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': True,
+                'image_path': web_path,
+                'message': 'Image created successfully!'
+            })
+        
+        # Default behavior (redirect to separate page)
+        return render_template('meme.html', path=web_path)
         
     except requests.RequestException as e:
+        # Clean up temporary file if it exists
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False,
+                'error': f'Could not download image: {str(e)}',
+                'message': 'Image download failed. Please check the URL and try again.'
+            }), 400
+        
         return render_template('error.html', 
                              error=f'Could not download image: {str(e)}')
     except Exception as e:
         # Clean up temporary file if it exists
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
+        
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False,
+                'error': f'Could not generate meme: {str(e)}',
+                'message': 'Image generation failed. Please try again.'
+            }), 500
+        
         return render_template('error.html', 
                              error=f'Could not generate meme: {str(e)}')
+
+
+@app.route('/download/<path:filename>')
+def download_image(filename):
+    """Download generated image with different format options."""
+    try:
+        # Get the format parameter (default to original)
+        format_type = request.args.get('format', 'original')
+        
+        # Read the source image
+        image_path = os.path.join(app.static_folder, filename)
+        if not os.path.exists(image_path):
+            return "Image not found", 404
+        
+        from PIL import Image
+        img = Image.open(image_path)
+        
+        # Create a temporary file for the converted image
+        import tempfile
+        import uuid
+        
+        if format_type == 'png':
+            temp_filename = f"download_{uuid.uuid4()}.png"
+            temp_path = os.path.join(app.static_folder, temp_filename)
+            img.save(temp_path, 'PNG', optimize=True)
+            download_name = f"text-overlay-{uuid.uuid4().hex[:8]}.png"
+        elif format_type == 'webp':
+            temp_filename = f"download_{uuid.uuid4()}.webp"
+            temp_path = os.path.join(app.static_folder, temp_filename)
+            img.save(temp_path, 'WEBP', quality=90, optimize=True)
+            download_name = f"text-overlay-{uuid.uuid4().hex[:8]}.webp"
+        elif format_type == 'pdf':
+            temp_filename = f"download_{uuid.uuid4()}.pdf"
+            temp_path = os.path.join(app.static_folder, temp_filename)
+            # Convert to RGB if necessary for PDF
+            if img.mode in ('RGBA', 'LA', 'P'):
+                rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                rgb_img.save(temp_path, 'PDF', resolution=100.0)
+            else:
+                img.save(temp_path, 'PDF', resolution=100.0)
+            download_name = f"text-overlay-{uuid.uuid4().hex[:8]}.pdf"
+        else:  # original format
+            temp_path = image_path
+            original_ext = filename.split('.')[-1]
+            download_name = f"text-overlay-{uuid.uuid4().hex[:8]}.{original_ext}"
+        
+        # Send the file and clean up temporary file
+        def remove_file(response):
+            if temp_path != image_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+            return response
+        
+        from flask import send_file
+        response = send_file(temp_path, as_attachment=True, download_name=download_name)
+        
+        # Schedule cleanup after response is sent
+        if temp_path != image_path:
+            import threading
+            def cleanup():
+                import time
+                time.sleep(5)  # Wait a bit before cleanup
+                try:
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                except:
+                    pass
+            threading.Thread(target=cleanup).start()
+        
+        return response
+        
+    except Exception as e:
+        return f"Error downloading image: {str(e)}", 500
 
 
 @app.route('/test-url')
