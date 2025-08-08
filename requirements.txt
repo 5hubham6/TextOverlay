@@ -1,3 +1,4 @@
+# Core dependencies for TextOverlay app
 Flask>=2.3.0
 Pillow>=10.0.0
 python-docx>=0.8.11
