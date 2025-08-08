@@ -1,5 +1,6 @@
 # TextOverlay - simple web app for putting text on images
 # Built this when I was bored and wanted to make some quick image edits
+# Flask app handles the web interface
 import random
 import os
 import requests
