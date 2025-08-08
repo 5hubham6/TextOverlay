@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TextOverlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold gradient-text">TextOverlay</h1>
+                    <span class="text-gray-400">|</span>
+                    <h2 class="text-xl text-gray-600">Dashboard</h2>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600">Welcome, <strong>{{ user.username }}</strong>!</span>
+                    <a href="{{ url_for('profile') }}" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-user-circle text-lg"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 border border-red-200 text-red-700{% elif category == 'success' %}bg-green-100 border border-green-200 text-green-700{% elif category == 'warning' %}bg-yellow-100 border border-yellow-200 text-yellow-700{% else %}bg-blue-100 border border-blue-200 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Welcome Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-home mr-3 text-blue-500"></i>Welcome to Your Dashboard
+            </h3>
+            <p class="text-gray-600 mb-6">
+                You're now logged in! Choose from our text overlay editors to start creating amazing designs.
+            </p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Try Now Editor -->
+            <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-bolt text-blue-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-800">Quick Editor</h4>
+                </div>
+                <p class="text-gray-600 mb-4">Fast and simple text overlay with sample images.</p>
+                <a href="{{ url_for('try_now') }}" class="inline-flex items-center text-blue-600 font-medium hover:text-blue-700">
+                    Start Creating <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Professional Editor -->
+            <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-image text-green-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-800">Professional Editor</h4>
+                </div>
+                <p class="text-gray-600 mb-4">Upload your own images with advanced text controls.</p>
+                <a href="{{ url_for('professional_editor') }}" class="inline-flex items-center text-green-600 font-medium hover:text-green-700">
+                    Start Creating <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Canvas Creator -->
+            <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-paint-brush text-purple-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-800">Canvas Creator</h4>
+                </div>
+                <p class="text-gray-600 mb-4">Advanced editor with drag-and-drop controls.</p>
+                <a href="{{ url_for('canvas_creator') }}" class="inline-flex items-center text-purple-600 font-medium hover:text-purple-700">
+                    Start Creating <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Account Info -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-user mr-3 text-gray-500"></i>Account Information
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Username</h4>
+                    <p class="text-gray-600">{{ user.username }}</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Email</h4>
+                    <p class="text-gray-600">{{ user.email }}</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Member Since</h4>
+                    <p class="text-gray-600">{{ user.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Status</h4>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-2"></i>Active
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

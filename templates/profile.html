@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - TextOverlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('dashboard') }}" class="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">TextOverlay</a>
+                    <span class="text-gray-400">|</span>
+                    <h2 class="text-xl text-gray-600">Profile</h2>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('dashboard') }}" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-dashboard mr-2"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        
+        <!-- Profile Header -->
+        <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
+            <div class="flex items-center space-x-6">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">{{ user.username }}</h1>
+                    <p class="text-gray-600 mt-1">{{ user.email }}</p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-calendar mr-2"></i>Member since {{ user.created_at.strftime('%B %d, %Y') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Details -->
+        <div class="grid md:grid-cols-2 gap-8">
+            
+            <!-- Account Information -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">
+                    <i class="fas fa-info-circle mr-3 text-blue-500"></i>Account Information
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                        <span class="font-medium text-gray-700">Username</span>
+                        <span class="text-gray-600">{{ user.username }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                        <span class="font-medium text-gray-700">Email</span>
+                        <span class="text-gray-600">{{ user.email }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                        <span class="font-medium text-gray-700">User ID</span>
+                        <span class="text-gray-600 font-mono text-sm">{{ user.id[:8] }}...</span>
+                    </div>
+                    <div class="flex justify-between items-center py-3">
+                        <span class="font-medium text-gray-700">Account Status</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-2"></i>Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">
+                    <i class="fas fa-bolt mr-3 text-purple-500"></i>Quick Actions
+                </h3>
+                
+                <div class="space-y-4">
+                    <a href="{{ url_for('try_now') }}" class="block p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-bolt text-blue-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Quick Editor</h4>
+                                <p class="text-sm text-gray-600">Fast text overlay creation</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('professional_editor') }}" class="block p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-image text-green-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Professional Editor</h4>
+                                <p class="text-sm text-gray-600">Upload and customize your images</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('canvas_creator') }}" class="block p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-paint-brush text-purple-500 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Canvas Creator</h4>
+                                <p class="text-sm text-gray-600">Advanced drag-and-drop editor</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coming Soon Features -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">
+                <i class="fas fa-rocket mr-3 text-orange-500"></i>Coming Soon
+            </h3>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="p-4 rounded-lg bg-gray-50 opacity-75">
+                    <i class="fas fa-images text-gray-400 text-2xl mb-2"></i>
+                    <h4 class="font-medium text-gray-600">My Images</h4>
+                    <p class="text-sm text-gray-500">Save and manage your creations</p>
+                </div>
+                <div class="p-4 rounded-lg bg-gray-50 opacity-75">
+                    <i class="fas fa-share-alt text-gray-400 text-2xl mb-2"></i>
+                    <h4 class="font-medium text-gray-600">Share Gallery</h4>
+                    <p class="text-sm text-gray-500">Share your designs publicly</p>
+                </div>
+                <div class="p-4 rounded-lg bg-gray-50 opacity-75">
+                    <i class="fas fa-heart text-gray-400 text-2xl mb-2"></i>
+                    <h4 class="font-medium text-gray-600">Favorites</h4>
+                    <p class="text-sm text-gray-500">Like and save favorite designs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

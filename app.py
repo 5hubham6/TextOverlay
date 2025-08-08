@@ -4,16 +4,78 @@
 import random
 import os
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
+from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 import tempfile
+import uuid
+from datetime import datetime
 
 from ImageProcessor import ImageProcessor
 from TextParser import Parser, Quote
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
+
+# Database setup (ready for when you connect PostgreSQL)
+DATABASE_CONFIG = {
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'database': os.environ.get('DB_NAME', 'textoverlay'),
+    'user': os.environ.get('DB_USER', 'textuser'),
+    'password': os.environ.get('DB_PASSWORD', 'defaultpass'),
+    'port': os.environ.get('DB_PORT', '5432')
+}
+
+# Simple in-memory user store for now (will connect to PostgreSQL later)
+users_db = {
+    'demo': {
+        'id': str(uuid.uuid4()),
+        'username': 'demo',
+        'email': 'demo@textoverlay.com',
+        'password_hash': generate_password_hash('demo123'),
+        'created_at': datetime.now()
+    }
+}
 
 # Initialize image processor 
 overlay = ImageProcessor('./static')
+
+# Authentication helpers
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    if 'user_id' not in session:
+        return None
+    user_id = session['user_id']
+    for user in users_db.values():
+        if user['id'] == user_id:
+            return user
+    return None
+
+def create_user(username, email, password):
+    # Check if user already exists
+    for user in users_db.values():
+        if user['username'] == username or user['email'] == email:
+            return None
+    
+    # Create new user
+    user_id = str(uuid.uuid4())
+    user = {
+        'id': user_id,
+        'username': username,
+        'email': email,
+        'password_hash': generate_password_hash(password),
+        'created_at': datetime.now()
+    }
+    users_db[username] = user
+    return user
 
 
 def setup():
@@ -260,6 +322,82 @@ def test_url():
             'url': test_url,
             'error': str(e)
         }
+
+
+# Authentication Routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Check user credentials
+        user = users_db.get(username)
+        if user and check_password_hash(user['password_hash'], password):
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            flash(f'Welcome back, {user["username"]}!', 'success')
+            
+            # Redirect to where they were trying to go, or dashboard
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+        else:
+            flash('Invalid username or password.', 'error')
+    
+    return render_template('auth/login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        # Validation
+        if not username or not email or not password:
+            flash('All fields are required.', 'error')
+        elif password != confirm_password:
+            flash('Passwords do not match.', 'error')
+        elif len(password) < 6:
+            flash('Password must be at least 6 characters long.', 'error')
+        else:
+            # Try to create user
+            user = create_user(username, email, password)
+            if user:
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                flash(f'Account created successfully! Welcome, {user["username"]}!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Username or email already exists.', 'error')
+    
+    return render_template('auth/register.html')
+
+@app.route('/logout')
+def logout():
+    username = session.get('username', 'User')
+    session.clear()
+    flash(f'Goodbye, {username}! You have been logged out.', 'info')
+    return redirect(url_for('landing_page'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    return render_template('dashboard.html', user=user)
+
+@app.route('/profile')
+@login_required
+def profile():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    return render_template('profile.html', user=user)
 
 
 if __name__ == "__main__":

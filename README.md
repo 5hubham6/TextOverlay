@@ -2,8 +2,6 @@
 
 Was getting bored and this idea came to mind - a simple web app for putting text on images. Started as just a quick project but ended up adding more features as I went along.
 
-Turns out it's actually pretty useful! 🎯
-
 ## What it does
 
 ```
